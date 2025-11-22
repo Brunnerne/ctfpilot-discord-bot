@@ -244,7 +244,7 @@ class ChallengeCreateGroup(app_commands.Group):
             await interaction.edit_original_response(content=f"❌ You must have one of the following roles to use this command: {', '.join(ALLOWED_ROLES) if ALLOWED_ROLES else 'None set'}.")
             return
         try:
-            safe_name = clean_input(name, field="Challenge name", min_len=3, max_len=100)
+            safe_name = markdown_clean(name, field="Challenge name", min_len=3, max_len=100)
         except ValueError as e:
             await interaction.edit_original_response(content=f"❌ {e}")
             return
@@ -261,16 +261,16 @@ class ChallengeCreateGroup(app_commands.Group):
             f"Difficulty: {difficulty.value}"
         ]
         issue_body = f"""
-Challenge: {markdown_clean(safe_name)}
+Challenge: {safe_name}
 
 The issue was automatically created by the Discord bot, triggered by {markdown_clean(interaction.user.display_name, field="Display name", min_len=1, max_len=100)}.  
 No code was generated, please trigger that manually, through the actions or the Discord bot.
 
-This issue is linked to the Discord channel: [#{markdown_clean(safe_name)}](https://discord.com/channels/{interaction.guild_id}/{interaction.channel_id}).
+This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/channels/{interaction.guild_id}/{interaction.channel_id}).
         """
         try:
             logger.debug(f"Creating issue with title: {safe_name}, body: {issue_body}, labels: {labels}, milestone: {milestone_obj.title if milestone_obj else 'None'}")
-            issue = gh.create_issue(markdown_clean(safe_name), issue_body, labels, milestone=milestone_obj)
+            issue = gh.create_issue(safe_name, issue_body, labels, milestone=milestone_obj)
             logger.debug(f"Created issue: {issue.title} (#{issue.number})")
             def update_challenges(challenges):
                 if not isinstance(challenges, dict):
