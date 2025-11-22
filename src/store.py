@@ -33,8 +33,11 @@ class Store:
     @staticmethod
     def _save_db_unlocked(db):
         """Internal method to save DB without acquiring lock (lock must be held by caller)"""
-        with open(Store.MAPPING_PATH, "w") as f:
-            json.dump(db, f, indent=2)
+        try:
+            with open(Store.MAPPING_PATH, "w") as f:
+                json.dump(db, f, indent=2)
+        except Exception as e:
+            Store._logger.error(f"Failed to write DB file: {e}")
 
     @staticmethod
     def get_db():
