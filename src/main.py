@@ -630,12 +630,12 @@ DISCORD_ESCAPE_CHARS = r"\[]#@&<>"
 DISCORD_ESCAPE_TRANSLATION = {ord(c): "\\" + c for c in DISCORD_ESCAPE_CHARS}
 
 def markdown_clean(text: str, field: str = "", min_len: int = 3, max_len: int = 100) -> str:
-    """Escape markdown special characters in a string."""
+    """Clean and escape markdown special characters in a string."""
     clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
     return clean_text.translate(MARKDOWN_ESCAPE_TRANSLATION)
 
 def discord_clean(text: str, field: str = "", min_len: int = 3, max_len: int = 100) -> str:
-    """Escape Discord special characters in a string."""
+    """Clean and escape Discord special characters in a string."""
     clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
     return clean_text.translate(DISCORD_ESCAPE_TRANSLATION)
 
