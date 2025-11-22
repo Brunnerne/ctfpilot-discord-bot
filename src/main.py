@@ -172,6 +172,9 @@ async def ping_shadow(interaction: discord.Interaction):
 )
 async def issues(interaction: discord.Interaction, status: app_commands.Choice[str], page: Optional[int] = 1):
     await interaction.response.defer(thinking=True)
+    if not is_authorized(interaction):
+        await interaction.edit_original_response(content=f"❌ You must have one of the following roles to use this command: {', '.join(ALLOWED_ROLES) if ALLOWED_ROLES else 'None set'}.")
+        return
     if not gh_enabled:
         await interaction.edit_original_response(content="GitHub API features are disabled.")
         return
