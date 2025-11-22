@@ -235,7 +235,7 @@ class ChallengeCreateGroup(app_commands.Group):
             await interaction.edit_original_response(content=f"❌ You must have one of the following roles to use this command: {', '.join(ALLOWED_ROLES) if ALLOWED_ROLES else 'None set'}.")
             return
         try:
-            safe_name = sanitize_input(name, field="Challenge name", min_len=3, max_len=100)
+            safe_name = clean_input(name, field="Challenge name", min_len=3, max_len=100)
         except ValueError as e:
             await interaction.edit_original_response(content=f"❌ {e}")
             return
@@ -312,8 +312,8 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
             await interaction.edit_original_response(content=f"❌ You must have one of the following roles to use this command: {', '.join(ALLOWED_ROLES) if ALLOWED_ROLES else 'None set'}.")
             return
         try:
-            safe_author = sanitize_input(author, field="Author", min_len=3, max_len=50)
-            safe_flag = sanitize_input(flag, field="Flag", min_len=3, max_len=1000) if flag else ""
+            safe_author = clean_input(author, field="Author", min_len=3, max_len=50)
+            safe_flag = clean_input(flag, field="Flag", min_len=3, max_len=1000) if flag else ""
         except ValueError as e:
             await interaction.edit_original_response(content=f"❌ Input error: {e}")
             return
@@ -334,9 +334,9 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
         try:
             gh_issue = gh.get_issue(issue_number)
             if gh_issue is not None and name is None:
-                safe_name = sanitize_input(gh_issue.title, field="Challenge name", min_len=3, max_len=100)
+                safe_name = clean_input(gh_issue.title, field="Challenge name", min_len=3, max_len=100)
             elif name:
-                safe_name = sanitize_input(name, field="Challenge name", min_len=3, max_len=100)
+                safe_name = clean_input(name, field="Challenge name", min_len=3, max_len=100)
             if gh_issue is not None and category is None:
                 safe_category = gh.get_category(gh_issue)
             elif category:
@@ -509,7 +509,7 @@ class ChallengeUpdateGroup(app_commands.Group):
             await interaction.edit_original_response(content="No name provided.")
             return
         try:
-            safe_name = sanitize_input(name, field="Challenge name", min_len=3, max_len=100)
+            safe_name = clean_input(name, field="Challenge name", min_len=3, max_len=100)
         except ValueError as e:
             await interaction.edit_original_response(content=f"❌ {e}")
             return
@@ -609,7 +609,7 @@ def is_authorized(interaction: discord.Interaction) -> bool:
         return False
     return any(str(role.id) in ALLOWED_ROLES for role in getattr(interaction.user, 'roles', []))
 
-def sanitize_input(text: str, field: str = "", min_len: int = 3, max_len: int = 100) -> str:
+def clean_input(text: str, field: str = "", min_len: int = 3, max_len: int = 100) -> str:
     """Sanitize user input for GitHub/Discord. Returns sanitized string or raises ValueError."""
     if not isinstance(text, str):
         raise ValueError(f"{field or 'Input'} must be a string.")
@@ -620,10 +620,6 @@ def sanitize_input(text: str, field: str = "", min_len: int = 3, max_len: int = 
         raise ValueError(f"{field or 'Input'} is too long (max {max_len} chars).")
     # Remove newlines and excessive whitespace
     text = ' '.join(text.split())
-    # Escape markdown links and @
-    text = text.replace('[', '').replace(']', '').replace('@', '')
-    # Escape special characters like quotes
-    text = text.replace('"', '\\"').replace("'", "\\'").replace('`', '\\`')
     
     return text
 
