@@ -297,13 +297,7 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
             else:
                 await interaction.edit_original_response(content=f"✅ Challenge issue created, but failed to add to project: {err} [{issue.title}]({issue.html_url})")
         except requests.exceptions.RequestException as e:
-            error_message = str(e)
-            if hasattr(e, 'response') and e.response:
-                try:
-                    error_message = e.response.json().get('message', error_message)
-                except Exception as parse_exc:
-                    logger.debug(f"Failed to parse error message from response JSON: {parse_exc}")
-            logger.error(f"Failed to create GitHub issue: {error_message}")
+            logger.error(f"Failed to create GitHub issue: {e}")
             await interaction.edit_original_response(content=f"❌ Failed to create GitHub issue. Check if the issue already exists, otherwise contact an admin.")
 
     @app_commands.command(name="code", description="Trigger the GitHub pipeline to create challenge code.")
@@ -356,11 +350,11 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
             elif name:
                 safe_name = clean_input(name, field="Challenge name", min_len=3, max_len=100)
             if gh_issue is not None and category is None:
-                safe_category = gh.get_category(gh_issue)
+                safe_category = gh.get_category(gh_issue) or ""
             elif category:
                 safe_category = category.value
             if gh_issue is not None and difficulty is None:
-                safe_difficulty = gh.get_difficulty(gh_issue)
+                safe_difficulty = gh.get_difficulty(gh_issue) or ""
             elif difficulty:
                 safe_difficulty = difficulty.value
 
@@ -396,13 +390,7 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
             actions_url = f"https://github.com/{GH_REPO}/actions/workflows/create-chall.yml"
             await interaction.edit_original_response(content=f"✅ Triggered pipeline for challenge code creation for issue [#{issue_number}]({gh.repo.html_url}/issues/{issue_number})\n\n Check the progress here: [Actions]({actions_url})")
         except requests.exceptions.RequestException as e:
-            error_message = str(e)
-            if hasattr(e, 'response') and e.response:
-                try:
-                    error_message = e.response.json().get('message', error_message)
-                except Exception as parse_exc:
-                    logger.debug(f"Failed to parse error message from response JSON: {parse_exc}")
-            logger.error(f"Failed to trigger pipeline: {error_message}")
+            logger.error(f"Failed to trigger pipeline: {e}")
             await interaction.edit_original_response(content=f"❌ Failed to trigger pipeline. Please check if the pipeline is running, otherwise contact an admin.")
         except WorkflowTriggerException as e:
             logger.error(f"Failed to trigger pipeline")
