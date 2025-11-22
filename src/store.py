@@ -2,10 +2,23 @@ import os
 import json
 import threading
 
+from logger import Logger
+
 class Store:
     MAPPING_FILENAME = "challenge_issues.json"
     MAPPING_PATH = os.path.join(os.path.dirname(__file__), MAPPING_FILENAME)
+    _logger: Logger = Logger(verbose=False)
     _lock = threading.Lock()
+    
+    @staticmethod
+    def initialize_db(logger: Logger):
+        """Initialize the DB file if it does not exist"""
+        with Store._lock:
+            if not os.path.exists(Store.MAPPING_PATH):
+                with open(Store.MAPPING_PATH, "w") as f:
+                    json.dump({}, f, indent=2)
+                    
+        Store._logger = logger
 
     @staticmethod
     def _get_db_unlocked():
@@ -14,6 +27,7 @@ class Store:
             with open(Store.MAPPING_PATH, "r") as f:
                 return json.load(f)
         except Exception:
+            Store._logger.error("Failed to read DB file, returning empty DB")
             return {}
 
     @staticmethod

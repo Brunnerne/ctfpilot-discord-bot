@@ -40,6 +40,7 @@ parser.add_argument('--flag-prefix', type=str, help='Prefix for challenge flags 
 args, _ = parser.parse_known_args()
 
 logger = Logger(verbose=args.verbose, debug=args.debug)
+Store.initialize_db(logger)
     
 if args.token:
     os.environ['DISCORD_TOKEN'] = args.token
