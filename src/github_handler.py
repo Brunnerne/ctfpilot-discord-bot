@@ -126,13 +126,13 @@ class GithubHandler:
             return False, "Could not find status field or option in project."
         # Step 3: Set status field
         set_status_query = '''
-        mutation SetStatus($itemId:ID!, $fieldId:ID!, $optionId: String!) {
-          updateProjectV2ItemFieldValue(
-            input: {projectId: \"%s\", itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $optionId }}
-          ) { projectV2Item { id } }
-        }
-        ''' % project_id
-        variables = {"itemId": item_id, "fieldId": status_field_id, "optionId": status_option_id}
+        mutation SetStatus($projectId:ID!, $itemId:ID!, $fieldId:ID!, $optionId: String!) {  
+          updateProjectV2ItemFieldValue(  
+            input: {projectId: $projectId, itemId: $itemId, fieldId: $fieldId, value: { singleSelectOptionId: $optionId }}  
+          ) { projectV2Item { id } }  
+        }  
+        '''  
+        variables = {"projectId": project_id, "itemId": item_id, "fieldId": status_field_id, "optionId": status_option_id}  
         r2 = requests.post(self.api_url, json={"query": set_status_query, "variables": variables}, headers=self.headers)
         if r2.ok:
             return True, None
