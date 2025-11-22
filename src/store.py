@@ -62,10 +62,35 @@ class Store:
             Store._save_db_unlocked(db)
 
     @staticmethod
+    def get_challenge_key(channel_id, default=None):
+        with Store._lock:
+            db = Store._get_db_unlocked()
+            challenges = db.get("challenges", {})
+            return challenges.get(channel_id, default)
+
+    @staticmethod
+    def set_challenge_key(channel_id, value):
+        with Store._lock:
+            db = Store._get_db_unlocked()
+            challenges = db.get("challenges", {})
+            challenges[channel_id] = value
+            db["challenges"] = challenges
+            Store._save_db_unlocked(db)
+
+    @staticmethod
     def update_key(key, update_func):
         with Store._lock:
             db = Store._get_db_unlocked()
             db[key] = update_func(db.get(key, {}))
+            Store._save_db_unlocked(db)
+            
+    @staticmethod
+    def update_challenge_key(channel_id, update_func):
+        with Store._lock:
+            db = Store._get_db_unlocked()
+            challenges = db.get("challenges", {})
+            challenges[channel_id] = update_func(challenges.get(channel_id, {}))
+            db["challenges"] = challenges
             Store._save_db_unlocked(db)
             
     @staticmethod

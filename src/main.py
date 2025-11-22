@@ -584,9 +584,7 @@ async def link_channel(interaction: discord.Interaction, issue_number: int):
     if not is_authorized(interaction):
         await interaction.response.send_message(f"❌ You must have one of the following roles to use this command: {', '.join(ALLOWED_ROLES) if ALLOWED_ROLES else 'None set'}.", ephemeral=True)
         return
-    mapping = Store.get_key("challenges", {}) or {}
-    mapping[str(interaction.channel_id)] = issue_number
-    Store.set_key("challenges", mapping)
+    Store.set_challenge_key(str(interaction.channel_id), issue_number)
     await interaction.response.send_message(f"✅ Linked issue #{issue_number} to this channel.", ephemeral=True)
 
 @challenge_group.command(name="info", description="Show information about the current challenge (from channel or by issue number)")
