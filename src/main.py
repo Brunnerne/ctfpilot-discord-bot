@@ -554,8 +554,6 @@ async def info(interaction: discord.Interaction, issue_number: Optional[int] = N
         await interaction.response.send_message(f"❌ You must have one of the following roles to use this command: {', '.join(ALLOWED_ROLES) if ALLOWED_ROLES else 'None set'}.", ephemeral=True)
         return
     await interaction.response.defer(thinking=True)
-    github_token = os.getenv('GITHUB_TOKEN') or ""
-    gh = GithubHandler(github_token, GH_REPO or "")
     if issue_number is None:
         mapping = Store.get_key("challenges", {}) or {}
         issue_number = mapping.get(str(interaction.channel_id)) if mapping else None
