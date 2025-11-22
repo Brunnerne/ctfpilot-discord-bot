@@ -1,0 +1,9 @@
+services:
+  github-discord-manager:
+    build: .
+    container_name: github-manager-bot
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - ./challenge_issues.json:/app/challenge_issues.json
+      
