@@ -389,7 +389,7 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
             logger.error(f"Failed to trigger pipeline: {e}")
             await interaction.edit_original_response(content=f"❌ Failed to trigger pipeline. Please check if the pipeline is running, otherwise contact an admin.")
         except WorkflowTriggerException as e:
-            logger.error(f"Failed to trigger pipeline")
+            logger.error(f"Failed to trigger pipeline: {e}")
             await interaction.edit_original_response(content=f"❌ Failed to trigger pipeline. Please check if the pipeline is running, otherwise contact an admin.")
 
 class ChallengeUpdateGroup(app_commands.Group):
@@ -662,15 +662,11 @@ DISCORD_ESCAPE_TRANSLATION = {ord(c): "\\" + c for c in DISCORD_ESCAPE_CHARS}
 def markdown_clean(text: str, field: str = "", min_len: int = 0, max_len: int = 100) -> str:
     """Clean and escape markdown special characters in a string."""
     clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
-    # Escape backslash first to avoid double-escaping
-    clean_text = clean_text.replace("\\", "\\\\")
     return clean_text.translate(MARKDOWN_ESCAPE_TRANSLATION)
 
 def discord_clean(text: str, field: str = "", min_len: int = 0, max_len: int = 100) -> str:
     """Clean and escape Discord special characters in a string."""
     clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
-    # Escape backslash first to avoid double-escaping
-    clean_text = clean_text.replace("\\", "\\\\")
     return clean_text.translate(DISCORD_ESCAPE_TRANSLATION)
 
 client.run(os.getenv('DISCORD_TOKEN') or "")
