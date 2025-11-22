@@ -81,11 +81,16 @@ if not os.getenv('GITHUB_REPO'):
     logger.warning("No GITHUB_REPO provided, GitHub API features will be disabled.")
 
 GUILD_ID = os.getenv('DISCORD_GUILD_ID')
+if not GUILD_ID:
+    logger.warning("No DISCORD_GUILD_ID provided, no commands will be available.")
 
 CATEGORIES = [c.strip() for c in (os.getenv('CATEGORIES') or 'web,crypto,pwn,misc').split(',')]
 DIFFICULTIES = [d.strip() for d in (os.getenv('DIFFICULTIES') or 'easy,medium,hard').split(',')]
 STATUS = [s.strip() for s in (os.getenv('STATUS') or 'Idea,Todo,In Progress,In review,Done').split(',')]
 ALLOWED_ROLES = [r.strip() for r in (os.getenv('DISCORD_ALLOWED_ROLES') or '').split(',') if r.strip()]
+if len(ALLOWED_ROLES) == 0:
+    logger.info("No DISCORD_ALLOWED_ROLES provided, no commands will be available.")
+
 FLAG_LENGTH = 1000
 
 FLAG_PREFIX = os.getenv('FLAG_PREFIX') or "ctf"
@@ -631,7 +636,7 @@ def is_authorized(interaction: discord.Interaction) -> bool:
     # Check allowed roles (by role ID)
     if not ALLOWED_ROLES:
         return False
-    if not interaction.guild or not hasattr(interaction.user, 'roles'):
+    if not hasattr(interaction.user, 'roles'):
         return False
     return any(str(role.id) in ALLOWED_ROLES for role in getattr(interaction.user, 'roles', []))
 
