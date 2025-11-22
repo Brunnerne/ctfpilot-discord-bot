@@ -77,7 +77,7 @@ if not os.getenv('GITHUB_TOKEN'):
 if not os.getenv('GITHUB_REPO'):
     logger.warning("No GITHUB_REPO provided, GitHub API features will be disabled.")
 
-guild_id = os.getenv('DISCORD_GUILD_ID')
+GUILD_ID = os.getenv('DISCORD_GUILD_ID')
 
 CATEGORIES = [c.strip() for c in (os.getenv('CATEGORIES') or 'web,crypto,pwn,misc').split(',')]
 DIFFICULTIES = [d.strip() for d in (os.getenv('DIFFICULTIES') or 'easy,medium,hard').split(',')]
@@ -124,11 +124,11 @@ class MyClient(discord.Client):
 
     async def setup_hook(self):
         # Sync commands to a specific guild for faster updates (optional)
-        if guild_id:
-            guild = discord.Object(id=int(guild_id))
+        if GUILD_ID:
+            guild = discord.Object(id=int(GUILD_ID))
             self.tree.copy_global_to(guild=guild)
             await self.tree.sync(guild=guild)
-            logger.info(f"Slash commands synced to guild {guild_id}")
+            logger.info(f"Slash commands synced to guild {GUILD_ID}")
         else:
             await self.tree.sync()
             logger.info("Slash commands synced globally (may take up to 1 hour to appear)")
@@ -595,15 +595,12 @@ async def info(interaction: discord.Interaction, issue_number: Optional[int] = N
         logger.error(f"Failed to fetch issue info: {e}")
         await interaction.edit_original_response(content="❌ Failed to fetch challenge info. Please contact an admin.")
 
-GUILD_IDS = [g.strip() for g in (os.getenv('DISCORD_GUILD_ID') or '').split(',') if g.strip()]
-
 def is_authorized(interaction: discord.Interaction) -> bool:
     """Check if the user has at least one allowed role (by ID) and is in an allowed guild."""
-    # Check allowed guilds
-    if GUILD_IDS:
-        guild_id = str(getattr(interaction.guild, 'id', None))
-        if guild_id not in GUILD_IDS:
-            return False
+    # Check allowed guild
+    guild_id = str(getattr(interaction.guild, 'id', None))
+    if guild_id != GUILD_ID:
+        return False
     # Check allowed roles (by role ID)
     if not ALLOWED_ROLES:
         return False
