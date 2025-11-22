@@ -1,12 +1,15 @@
 import os
 import json
+import threading
 
 class Store:
     MAPPING_FILENAME = "challenge_issues.json"
     MAPPING_PATH = os.path.join(os.path.dirname(__file__), MAPPING_FILENAME)
+    _lock = threading.Lock()
 
     @staticmethod
-    def get_db():
+    def _get_db_unlocked():
+        """Internal method to read DB without acquiring lock (lock must be held by caller)"""
         try:
             with open(Store.MAPPING_PATH, "r") as f:
                 return json.load(f)
@@ -14,23 +17,37 @@ class Store:
             return {}
 
     @staticmethod
-    def save_db(db):
+    def _save_db_unlocked(db):
+        """Internal method to save DB without acquiring lock (lock must be held by caller)"""
         with open(Store.MAPPING_PATH, "w") as f:
             json.dump(db, f, indent=2)
 
     @staticmethod
+    def get_db():
+        with Store._lock:
+            return Store._get_db_unlocked()
+
+    @staticmethod
+    def save_db(db):
+        with Store._lock:
+            Store._save_db_unlocked(db)
+
+    @staticmethod
     def get_key(key, default=None):
-        db = Store.get_db()
-        return db.get(key, default)
+        with Store._lock:
+            db = Store._get_db_unlocked()
+            return db.get(key, default)
 
     @staticmethod
     def set_key(key, value):
-        db = Store.get_db()
-        db[key] = value
-        Store.save_db(db)
+        with Store._lock:
+            db = Store._get_db_unlocked()
+            db[key] = value
+            Store._save_db_unlocked(db)
 
     @staticmethod
     def update_key(key, update_func):
-        db = Store.get_db()
-        db[key] = update_func(db.get(key, {}))
-        Store.save_db(db)
+        with Store._lock:
+            db = Store._get_db_unlocked()
+            db[key] = update_func(db.get(key, {}))
+            Store._save_db_unlocked(db)
