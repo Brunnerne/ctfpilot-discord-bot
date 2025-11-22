@@ -1,5 +1,7 @@
 import os
 import argparse
+import requests
+
 from dotenv import load_dotenv
 
 import discord
@@ -11,8 +13,9 @@ from github import Auth
 from logger import Logger
 from store import Store
 from typing import Optional
-import requests
+
 from github_handler import GithubHandler
+from exceptions.WorkflowTriggerException import WorkflowTriggerException
 
 logger: Logger
 
@@ -394,6 +397,9 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
                 except Exception as parse_exc:
                     logger.debug(f"Failed to parse error message from response JSON: {parse_exc}")
             logger.error(f"Failed to trigger pipeline: {error_message}")
+            await interaction.edit_original_response(content=f"❌ Failed to trigger pipeline. Please check if the pipeline is running, otherwise contact an admin.")
+        except WorkflowTriggerException as e:
+            logger.error(f"Failed to trigger pipeline")
             await interaction.edit_original_response(content=f"❌ Failed to trigger pipeline. Please check if the pipeline is running, otherwise contact an admin.")
 
 class ChallengeUpdateGroup(app_commands.Group):
