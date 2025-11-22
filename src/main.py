@@ -327,9 +327,6 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
             await interaction.edit_original_response(content="No issue found for this channel. Please specify an issue number.")
             return
         
-        github_token = os.getenv('GITHUB_TOKEN') or ""
-        gh = GithubHandler(github_token, GH_REPO or "")
-        
         safe_name = ""
         safe_category = ""
         safe_difficulty = ""
