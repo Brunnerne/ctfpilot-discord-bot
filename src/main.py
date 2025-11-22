@@ -622,22 +622,21 @@ def clean_input(text: str, field: str = "", min_len: int = 3, max_len: int = 100
     
     return text
 
+# Precomputed translation tables for escaping
+MARKDOWN_ESCAPE_CHARS = r"\`*_{}[]()#+-.!|>"
+MARKDOWN_ESCAPE_TRANSLATION = {ord(c): "\\" + c for c in MARKDOWN_ESCAPE_CHARS}
+
+DISCORD_ESCAPE_CHARS = r"\[]#@&<>"
+DISCORD_ESCAPE_TRANSLATION = {ord(c): "\\" + c for c in DISCORD_ESCAPE_CHARS}
+
 def markdown_clean(text: str, field: str = "", min_len: int = 3, max_len: int = 100) -> str:
     """Escape markdown special characters in a string."""
     clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
-    
-    escape_chars = "\\`*_{}[]()#+-.!|>"
-    for char in escape_chars:
-        clean_text = clean_text.replace(char, f"\\{char}")
-    return clean_text
+    return clean_text.translate(MARKDOWN_ESCAPE_TRANSLATION)
 
 def discord_clean(text: str, field: str = "", min_len: int = 3, max_len: int = 100) -> str:
     """Escape Discord special characters in a string."""
     clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
-    
-    escape_chars = "\\[]#@&<>"
-    for char in escape_chars:
-        clean_text = clean_text.replace(char, f"\\{char}")
-    return clean_text
+    return clean_text.translate(DISCORD_ESCAPE_TRANSLATION)
 
 client.run(os.getenv('DISCORD_TOKEN') or "")
