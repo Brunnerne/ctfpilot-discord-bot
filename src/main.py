@@ -285,8 +285,8 @@ This issue is linked to the Discord channel: [#{markdown_clean(safe_name)}](http
             if e.response:
                 try:
                     error_message = e.response.json().get('message', error_message)
-                except Exception:
-                    pass
+                except Exception as parse_exc:
+                    logger.debug(f"Failed to parse error message from response JSON: {parse_exc}")
             logger.error(f"Failed to create GitHub issue: {error_message}")
             await interaction.edit_original_response(content=f"❌ Failed to create GitHub issue. Check if the issue already exists, otherwise contact an admin.")
 
@@ -384,8 +384,8 @@ This issue is linked to the Discord channel: [#{markdown_clean(safe_name)}](http
             if e.response:
                 try:
                     error_message = e.response.json().get('message', error_message)
-                except Exception:
-                    pass
+                except Exception as parse_exc:
+                    logger.debug(f"Failed to parse error message from response JSON: {parse_exc}")
             logger.error(f"Failed to trigger pipeline: {error_message}")
             await interaction.edit_original_response(content=f"❌ Failed to trigger pipeline. Please check if the pipeline is running, otherwise contact an admin.")
 
