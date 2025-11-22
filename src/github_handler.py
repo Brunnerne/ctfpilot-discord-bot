@@ -1,6 +1,7 @@
 import requests
 from logger import Logger
 from github import Github, Issue
+from exceptions.WorkflowTriggerException import WorkflowTriggerException
 
 class GithubHandler:
     def __init__(self, github_token: str, repo_name: str, logger: Logger):
@@ -19,7 +20,6 @@ class GithubHandler:
                     return m
         except Exception as e:
             self.logger.error(f"Failed to get milestone: '{title}': {e}")
-            pass
         return None
 
     def create_issue(self, name, body, labels, milestone=None):
