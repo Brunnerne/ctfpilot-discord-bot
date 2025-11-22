@@ -17,4 +17,4 @@ jobs:
     uses: ctfpilot/ci/.github/workflows/cla-assistant.yml@v1.3.0
     secrets: inherit
     with:
-      repository: <repository-name>
+      repository: discord-bot

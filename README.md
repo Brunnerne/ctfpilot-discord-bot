@@ -1,13 +1,6 @@
-# CTF Pilot's Template Repository
+# CTF Pilot's Discord Bot
 
-## Template information
-
-This repository, is a template repository for open-source projects within CTF Pilot.
-
-It provices a EUPL-1.2 License, release system and other standard files.
-
-Please remove this section, and replace with relevant information.  
-Replace `<repository-name>` with the repository name in `.github/workflows/cla-assistant.yml`and `.github/workflows/release.yml`.
+CTF Pilot's Discord Bot is a Discord bot, designed to integrate into a challenge repository, allowing for developers to manage challenges directly from Discord.
 
 ## Contributing
 

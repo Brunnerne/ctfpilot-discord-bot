@@ -17,5 +17,5 @@ jobs:
     secrets:
       RELEASE_GH_TOKEN: ${{ secrets.RELEASE_GH_TOKEN }}
     with:
-      repository: ctfpilot/<repository-name>
+      repository: ctfpilot/discord-bot
       ENVIRONMENT: Release
