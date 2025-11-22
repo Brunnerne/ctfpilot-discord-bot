@@ -586,7 +586,7 @@ async def info(interaction: discord.Interaction, issue_number: Optional[int] = N
             f"Issue Status: {global_status}"
             f"\n\n"
             f"[View Issue]({issue.html_url})\n"
-            f"[View Repostiory]({gh.repo.html_url})\n"
+            f"[View Repository]({gh.repo.html_url})\n"
         )
         await interaction.edit_original_response(content=info_msg)
     except Exception as e:
