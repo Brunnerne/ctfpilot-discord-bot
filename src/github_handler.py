@@ -180,10 +180,14 @@ class GithubHandler:
     def get_issue_project_status(self, issue_number, project_id, issue_node_id):
         """Return the project status for the given issue in the given project, or 'Unknown' if not found."""
         query = '''
-        query($projectId:ID!) {
+        query($projectId:ID!, $cursor:String) {
           node(id: $projectId) {
             ... on ProjectV2 {
-              items(first: 100) {
+              items(first: 100, after: $cursor) {
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
                 nodes {
                   content {
                     ... on Issue {
@@ -209,27 +213,44 @@ class GithubHandler:
           }
         }
         '''
-        variables = {"projectId": project_id}
-        r = requests.post(self.api_url, json={"query": query, "variables": variables}, headers=self.headers)
-        if not r.ok:
-            self.logger.error(f"Failed to fetch project status: {r.text}")
-            return 'Unknown'
-        try:
-            data = r.json()
-            node = data.get('data', {}).get('node', {})
-            items = node.get('items', {}).get('nodes', []) if node else []
-            for item in items:
-                content = item.get('content', {}) if item else {}
-                if content is None:
-                    continue
-                if str(content.get('number', '')) == str(issue_number):
-                    field_values = item.get('fieldValues', {}).get('nodes', []) if item.get('fieldValues') else []
-                    for field_value in field_values:
-                        field = field_value.get('field', {}) if field_value else {}
-                        if field.get('name', '') == 'Status':
-                            return field_value.get('name', 'Unknown')
-        except Exception as e:
-            self.logger.error(f"Exception in get_issue_project_status: {e}")
+        
+        cursor = None
+        while True:
+            variables = {"projectId": project_id, "cursor": cursor}
+            r = requests.post(self.api_url, json={"query": query, "variables": variables}, headers=self.headers)
+            if not r.ok:
+                self.logger.error(f"Failed to fetch project status: {r.text}")
+                return 'Unknown'
+            try:
+                data = r.json()
+                node = data.get('data', {}).get('node', {})
+                items_data = node.get('items', {}) if node else {}
+                items = items_data.get('nodes', [])
+                page_info = items_data.get('pageInfo', {})
+                
+                # Search for the issue in the current page
+                for item in items:
+                    content = item.get('content', {}) if item else {}
+                    if content is None:
+                        continue
+                    if str(content.get('number', '')) == str(issue_number):
+                        field_values = item.get('fieldValues', {}).get('nodes', []) if item.get('fieldValues') else []
+                        for field_value in field_values:
+                            field = field_value.get('field', {}) if field_value else {}
+                            if field.get('name', '') == 'Status':
+                                return field_value.get('name', 'Unknown')
+                        # Issue found but no status field
+                        return 'Unknown'
+                
+                # Check if there are more pages
+                if not page_info.get('hasNextPage', False):
+                    break
+                cursor = page_info.get('endCursor')
+                
+            except Exception as e:
+                self.logger.error(f"Exception in get_issue_project_status: {e}")
+                return 'Unknown'
+        
         return 'Unknown'
 
     def parse_issue(self, issue: Issue.Issue):
