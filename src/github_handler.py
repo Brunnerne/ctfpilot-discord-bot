@@ -46,7 +46,7 @@ class GithubHandler:
             workflow.create_dispatch(ref=ref, inputs=inputs)
         except Exception as e:
             self.logger.error(f"Failed to trigger workflow: {e}")
-            raise Exception(f"Failed to trigger workflow: {e}")
+            raise WorkflowTriggerException(f"Failed to trigger workflow: {e}")
         
 
     def get_status_field_and_option_id(self, project_id, status_name="Idea"):
