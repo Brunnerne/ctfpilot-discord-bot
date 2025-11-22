@@ -437,7 +437,12 @@ class ChallengeUpdateGroup(app_commands.Group):
         if difficulty:
             new_labels = [l.name for l in issue.labels if not l.name.startswith("Difficulty: ")]
             new_labels.append(f"Difficulty: {difficulty.value}")
-            gh.set_issue_labels(issue, new_labels)
+            try:
+                gh.set_issue_labels(issue, new_labels)
+            except Exception as e:
+                logger.error(f"Failed to set labels for issue #{issue.number}: {e}")
+                await interaction.edit_original_response(content=f"❌ Failed to update difficulty for challenge [#{issue.number}]({issue.html_url}).")
+                return
             await interaction.edit_original_response(content=f"✅ Updated difficulty to {difficulty.value} for challenge [#{issue.number}]({issue.html_url})")
         else:
             await interaction.edit_original_response(content="No difficulty provided.")
@@ -501,11 +506,21 @@ class ChallengeUpdateGroup(app_commands.Group):
         if not issue_number:
             await interaction.edit_original_response(content="No issue found for this channel. Please specify an issue number.")
             return
-        issue = gh.get_issue(issue_number)
+        try:
+            issue = gh.get_issue(issue_number)
+        except Exception as e:
+            logger.error(f"Failed to retrieve issue #{issue_number}: {e}")
+            await interaction.edit_original_response(content=f"❌ Could not retrieve issue #{issue_number}")
+            return
         if category:
             new_labels = [l.name for l in issue.labels if not l.name.startswith("Category: ")]
             new_labels.append(f"Category: {category.value}")
-            gh.set_issue_labels(issue, new_labels)
+            try:
+                gh.set_issue_labels(issue, new_labels)
+            except Exception as e:
+                logger.error(f"Failed to set labels for issue #{issue.number}: {e}")
+                await interaction.edit_original_response(content=f"❌ Failed to update category for challenge [#{issue.number}]({issue.html_url}).")
+                return
             await interaction.edit_original_response(content=f"✅ Updated category to {category.value} for challenge [#{issue.number}]({issue.html_url})")
         else:
             await interaction.edit_original_response(content="No category provided.")
@@ -537,8 +552,12 @@ class ChallengeUpdateGroup(app_commands.Group):
         except ValueError as e:
             await interaction.edit_original_response(content=f"❌ {e}")
             return
-        issue = gh.get_issue(issue_number)
-        issue.edit(title=safe_name)
+        try:  
+            issue = gh.get_issue(issue_number)  
+            issue.edit(title=safe_name)  
+        except Exception as e:  
+            await interaction.edit_original_response(content=f"❌ Failed to update challenge name: {e}")  
+            return 
         await interaction.edit_original_response(content=f"✅ Updated challenge name to '{safe_name}' for [#{issue.number}]({issue.html_url})")
 
 challenge_group = app_commands.Group(name="challenge", description="Challenge management commands.")
@@ -601,12 +620,12 @@ async def info(interaction: discord.Interaction, issue_number: Optional[int] = N
                 logger.error(f"Error fetching project status: {e}")
         info_msg = (
             f"**Challenge Info**\n"
-            f"Title: {discord_clean(name)}\n"
-            f"Assignees: {discord_clean(assignees)}\n"
-            f"Difficulty: {discord_clean(difficulty)}\n"
-            f"Category: {discord_clean(category)}\n"
-            f"Project Status: {discord_clean(project_status)}\n"
-            f"Issue Status: {discord_clean(global_status)}"
+            f"Title: {discord_clean(name, max_len=256)}\n"
+            f"Assignees: {discord_clean(assignees, max_len=256)}\n"
+            f"Difficulty: {discord_clean(difficulty, max_len=256)}\n"
+            f"Category: {discord_clean(category, max_len=256)}\n"
+            f"Project Status: {discord_clean(project_status, max_len=256)}\n"
+            f"Issue Status: {discord_clean(global_status, max_len=256)}"
             f"\n\n"
             f"[View Issue]({issue.html_url})\n"
             f"[View Repository]({gh.repo.html_url})\n"
