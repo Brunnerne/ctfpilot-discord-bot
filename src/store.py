@@ -13,12 +13,12 @@ class Store:
     @staticmethod
     def initialize_db(logger: Logger):
         """Initialize the DB file if it does not exist"""
+        Store._logger = logger
         with Store._lock:
             if not os.path.exists(Store.MAPPING_PATH):
                 with open(Store.MAPPING_PATH, "w") as f:
                     json.dump({}, f, indent=2)
                     
-        Store._logger = logger
 
     @staticmethod
     def _get_db_unlocked():
