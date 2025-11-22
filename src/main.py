@@ -83,6 +83,7 @@ CATEGORIES = [c.strip() for c in (os.getenv('CATEGORIES') or 'web,crypto,pwn,mis
 DIFFICULTIES = [d.strip() for d in (os.getenv('DIFFICULTIES') or 'easy,medium,hard').split(',')]
 STATUS = [s.strip() for s in (os.getenv('STATUS') or 'Idea,Todo,In Progress,In review,Done').split(',')]
 ALLOWED_ROLES = [r.strip() for r in (os.getenv('DISCORD_ALLOWED_ROLES') or '').split(',') if r.strip()]
+FLAG_LENGTH = 1000
 
 FLAG_PREFIX = os.getenv('FLAG_PREFIX') or "ctf"
 
@@ -314,7 +315,7 @@ This issue is linked to the Discord channel: [#{markdown_clean(safe_name)}](http
             return
         try:
             safe_author = clean_input(author, field="Author", min_len=3, max_len=50)
-            safe_flag = clean_input(flag, field="Flag", min_len=3, max_len=1000) if flag else ""
+            safe_flag = clean_input(flag, field="Flag", min_len=3, max_len=FLAG_LENGTH) if flag else ""
         except ValueError as e:
             await interaction.edit_original_response(content=f"❌ Input error: {e}")
             return
