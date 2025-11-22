@@ -91,9 +91,8 @@ ALLOWED_ROLES = [r.strip() for r in (os.getenv('DISCORD_ALLOWED_ROLES') or '').s
 if len(ALLOWED_ROLES) == 0:
     logger.info("No DISCORD_ALLOWED_ROLES provided, no commands will be available.")
 
-FLAG_LENGTH = 1000
-
 FLAG_PREFIX = os.getenv('FLAG_PREFIX') or "ctf"
+FLAG_LENGTH = 1000
 
 # --- GH configuration ---
 GH_REPO = os.getenv('GITHUB_REPO')
