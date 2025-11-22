@@ -98,19 +98,23 @@ PROJECT_NUMBER = os.getenv('GITHUB_PROJECT_ID')  # This is the project number, n
 PROJECT_ID = None
 MILESTONE_NAME = os.getenv('MILESTONE') or ""
 
+if not gh_enabled:
+    logger.error("GitHub not enabled due to missing configuration.")
+    logger.error("Bot will not start")
+    exit(1)
+
 github: Github
 github_token = os.getenv('GITHUB_TOKEN') or ""
 gh = GithubHandler(github_token, GH_REPO or "", logger)
 gh_repo = None
 
-if gh_enabled:
-    auth = Auth.Token(github_token)
-    github = Github(auth=auth)
-    gh_repo = github.get_repo(GH_REPO or "")
-    
-    gh.create_repo_labels(gh_repo, CATEGORIES, DIFFICULTIES)
+auth = Auth.Token(github_token)
+github = Github(auth=auth)
+gh_repo = github.get_repo(GH_REPO or "")
 
-if PROJECT_ORG and PROJECT_NUMBER and gh_enabled:
+gh.create_repo_labels(gh_repo, CATEGORIES, DIFFICULTIES)
+
+if PROJECT_ORG and PROJECT_NUMBER:
     PROJECT_ID = gh.get_project_node_id(PROJECT_ORG, int(PROJECT_NUMBER), is_org=True)
     if not PROJECT_ID:
         logger.error(f"Could not resolve project node ID for org={PROJECT_ORG}, number={PROJECT_NUMBER}")
@@ -122,7 +126,6 @@ else:
 ###################
 
 intents = discord.Intents.default()
-tree = app_commands.CommandTree(discord.Client(intents=intents))
 
 class MyClient(discord.Client):
     def __init__(self, *args, **kwargs):
