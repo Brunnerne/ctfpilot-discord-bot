@@ -185,7 +185,7 @@ async def issues(interaction: discord.Interaction, status: app_commands.Choice[s
         return
     
     # Pagination logic
-    items_per_page = 25
+    items_per_page = 10
     total_pages = (len(issues) + items_per_page - 1) // items_per_page  # Ceiling division
     
     # Ensure page has a valid value
@@ -625,4 +625,3 @@ def clean_input(text: str, field: str = "", min_len: int = 3, max_len: int = 100
     return text
 
 client.run(os.getenv('DISCORD_TOKEN') or "")
-
