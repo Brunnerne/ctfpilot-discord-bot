@@ -641,8 +641,11 @@ async def info(interaction: discord.Interaction, issue_number: Optional[int] = N
 
 def is_authorized(interaction: discord.Interaction) -> bool:
     """Check if the user has at least one allowed role (by ID) and is in an allowed guild."""
+    # Check if interaction.guild is None
+    if interaction.guild is None:
+        return False
     # Check allowed guild
-    guild_id = str(getattr(interaction.guild, 'id', None))
+    guild_id = str(interaction.guild.id)
     if GUILD_ID is not None and guild_id != GUILD_ID:
         return False
     # Check allowed roles (by role ID)
