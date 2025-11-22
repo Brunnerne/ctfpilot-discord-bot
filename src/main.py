@@ -95,7 +95,7 @@ MILESTONE_NAME = os.getenv('MILESTONE') or ""
 
 github: Github
 github_token = os.getenv('GITHUB_TOKEN') or ""
-gh = GithubHandler(github_token, GH_REPO or "")
+gh = GithubHandler(github_token, GH_REPO or "", logger)
 
 if gh_enabled:
     auth = Auth.Token(github_token)
