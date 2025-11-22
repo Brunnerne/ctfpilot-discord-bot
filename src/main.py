@@ -321,7 +321,7 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
             return
         try:
             safe_author = clean_input(author, field="Author", min_len=3, max_len=50)
-            safe_flag = clean_input(flag, field="Flag", min_len=3, max_len=FLAG_LENGTH) if flag else ""
+            safe_flag = clean_input(flag, field="Flag", min_len=3, max_len=FLAG_LENGTH)
         except ValueError as e:
             await interaction.edit_original_response(content=f"❌ Input error: {e}")
             return
