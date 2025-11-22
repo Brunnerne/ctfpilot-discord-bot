@@ -253,16 +253,16 @@ class ChallengeCreateGroup(app_commands.Group):
             f"Difficulty: {difficulty.value}"
         ]
         issue_body = f"""
-Challenge: {safe_name}
+Challenge: {markdown_clean(safe_name)}
 
-The issue was automatically created by the Discord bot, triggered by {interaction.user.display_name}.  
+The issue was automatically created by the Discord bot, triggered by {markdown_clean(interaction.user.display_name, field="Display name", min_len=1, max_len=100)}.  
 No code was generated, please trigger that manually, through the actions or the Discord bot.
 
-This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/channels/{interaction.guild_id}/{interaction.channel_id}).
+This issue is linked to the Discord channel: [#{markdown_clean(safe_name)}](https://discord.com/channels/{interaction.guild_id}/{interaction.channel_id}).
         """
         try:
             logger.debug(f"Creating issue with title: {safe_name}, body: {issue_body}, labels: {labels}, milestone: {milestone_obj.title if milestone_obj else 'None'}")
-            issue = gh.create_issue(safe_name, issue_body, labels, milestone=milestone_obj)
+            issue = gh.create_issue(markdown_clean(safe_name), issue_body, labels, milestone=milestone_obj)
             logger.debug(f"Created issue: {issue.title} (#{issue.number})")
             def update_challenges(challenges):
                 if not isinstance(challenges, dict):
@@ -510,7 +510,7 @@ class ChallengeUpdateGroup(app_commands.Group):
             await interaction.edit_original_response(content="No name provided.")
             return
         try:
-            safe_name = clean_input(name, field="Challenge name", min_len=3, max_len=100)
+            safe_name = markdown_clean(name, field="Challenge name", min_len=3, max_len=100)
         except ValueError as e:
             await interaction.edit_original_response(content=f"❌ {e}")
             return
@@ -579,12 +579,12 @@ async def info(interaction: discord.Interaction, issue_number: Optional[int] = N
                 logger.error(f"Error fetching project status: {e}")
         info_msg = (
             f"**Challenge Info**\n"
-            f"Title: {name}\n"
-            f"Assignees: {assignees}\n"
-            f"Difficulty: {difficulty}\n"
-            f"Category: {category}\n"
-            f"Project Status: {project_status}\n"
-            f"Issue Status: {global_status}"
+            f"Title: {discord_clean(name)}\n"
+            f"Assignees: {discord_clean(assignees)}\n"
+            f"Difficulty: {discord_clean(difficulty)}\n"
+            f"Category: {discord_clean(category)}\n"
+            f"Project Status: {discord_clean(project_status)}\n"
+            f"Issue Status: {discord_clean(global_status)}"
             f"\n\n"
             f"[View Issue]({issue.html_url})\n"
             f"[View Repository]({gh.repo.html_url})\n"
@@ -623,5 +623,23 @@ def clean_input(text: str, field: str = "", min_len: int = 3, max_len: int = 100
     text = ' '.join(text.split())
     
     return text
+
+def markdown_clean(text: str, field: str = "", min_len: int = 3, max_len: int = 100) -> str:
+    """Escape markdown special characters in a string."""
+    clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
+    
+    escape_chars = "\\`*_{}[]()#+-.!|>"
+    for char in escape_chars:
+        clean_text = clean_text.replace(char, f"\\{char}")
+    return clean_text
+
+def discord_clean(text: str, field: str = "", min_len: int = 3, max_len: int = 100) -> str:
+    """Escape Discord special characters in a string."""
+    clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
+    
+    escape_chars = "\\[]#@&<>"
+    for char in escape_chars:
+        clean_text = clean_text.replace(char, f"\\{char}")
+    return clean_text
 
 client.run(os.getenv('DISCORD_TOKEN') or "")
