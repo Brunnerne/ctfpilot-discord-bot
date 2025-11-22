@@ -153,14 +153,6 @@ client = MyClient(intents=intents)
 async def on_ready():
     logger.info(f'We have logged in as {client.user}')
 
-@client.tree.command(name="ping", description="Replies with Pong! in the channel.")
-async def ping(interaction: discord.Interaction):
-    await interaction.response.send_message("Pong!", ephemeral=False)
-
-@client.tree.command(name="ping_shadow", description="Replies with Pong! only to you.")
-async def ping_shadow(interaction: discord.Interaction):
-    await interaction.response.send_message("Pong!", ephemeral=True)
-
 @client.tree.command(name="challenges", description="List challenges in the GitHub.")
 @app_commands.describe(
     status="Show all, open (non-finished), or closed (finished) challenges.",
