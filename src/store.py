@@ -26,8 +26,8 @@ class Store:
         try:
             with open(Store.MAPPING_PATH, "r") as f:
                 return json.load(f)
-        except Exception:
-            Store._logger.error("Failed to read DB file, returning empty DB")
+        except Exception as e:
+            Store._logger.error(f"Failed to read DB file, returning empty DB: {e}")
             return {}
 
     @staticmethod
