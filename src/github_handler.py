@@ -1,6 +1,6 @@
 import requests
 from logger import Logger
-from github import Github, Issue
+from github import Github, Issue, Repository
 from exceptions.WorkflowTriggerException import WorkflowTriggerException
 
 class GithubHandler:
@@ -275,7 +275,7 @@ class GithubHandler:
             return None
         for label in issue.labels:
             if label.name.startswith("Difficulty: "):
-                return label.name.split("Difficulty: ")[1]
+                return label.name.removeprefix("Difficulty: ")
         return None
       
     def get_category(self, issue: Issue.Issue):
@@ -286,3 +286,23 @@ class GithubHandler:
             if label.name.startswith("Category: "):
                 return label.name.split("Category: ")[1]
         return None
+
+    def create_repo_labels(self, repository: Repository.Repository, categories: list[str], difficulties: list[str]):
+        """Create category and difficulty labels in the repository if they do not exist."""
+        existing_labels = {label.name: label for label in repository.get_labels()}
+        
+        # Ensure "Challenge" exists as a label
+        if "Challenge" not in existing_labels:
+            repository.create_label(name="Challenge", color="5319E7", description="Indicates a challenge issue")
+            self.logger.info("Created label: Challenge")
+        
+        for category in categories:
+            label_name = f"Category: {category}"
+            if label_name not in existing_labels:
+                repository.create_label(name=label_name, color="0E8A16", description=f"Challenge category: {category}")
+                self.logger.info(f"Created label: {label_name}")
+        for difficulty in difficulties:
+            label_name = f"Difficulty: {difficulty}"
+            if label_name not in existing_labels:
+                repository.create_label(name=label_name, color="D93F0B", description=f"Challenge difficulty: {difficulty}")
+                self.logger.info(f"Created label: {label_name}")

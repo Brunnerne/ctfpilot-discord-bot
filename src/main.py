@@ -98,10 +98,14 @@ MILESTONE_NAME = os.getenv('MILESTONE') or ""
 github: Github
 github_token = os.getenv('GITHUB_TOKEN') or ""
 gh = GithubHandler(github_token, GH_REPO or "", logger)
+gh_repo = None
 
 if gh_enabled:
     auth = Auth.Token(github_token)
     github = Github(auth=auth)
+    gh_repo = github.get_repo(GH_REPO or "")
+    
+    gh.create_repo_labels(gh_repo, CATEGORIES, DIFFICULTIES)
 
 if PROJECT_ORG and PROJECT_NUMBER and gh_enabled:
     PROJECT_ID = gh.get_project_node_id(PROJECT_ORG, int(PROJECT_NUMBER), is_org=True)
@@ -169,14 +173,17 @@ async def issues(interaction: discord.Interaction, status: app_commands.Choice[s
         await interaction.edit_original_response(content="GitHub API features are disabled.")
         return
     
-    repo = github.get_repo(os.getenv('GITHUB_REPO') or "")
-    logger.info(f"Fetching {status.name} challenges from GitHub repository {repo.full_name}")
+    if not gh_repo:
+        await interaction.edit_original_response(content="GitHub repository not set or could not be resolved. Command disabled.")
+        return
+    
+    logger.info(f"Fetching {status.name} challenges from GitHub repository {gh_repo.full_name}")
     if status.value == "open":
-        issues = repo.get_issues(state="open", labels=['Challenge'])
+        issues = gh_repo.get_issues(state="open", labels=['Challenge'])
     elif status.value == "closed":
-        issues = repo.get_issues(state="closed", labels=['Challenge'])
+        issues = gh_repo.get_issues(state="closed", labels=['Challenge'])
     else:
-        issues = repo.get_issues(state="all", labels=['Challenge'])
+        issues = gh_repo.get_issues(state="all", labels=['Challenge'])
         
     issues = (issue for issue in issues if "/issues/" in issue.html_url)
     issues = list(issues)
@@ -208,7 +215,7 @@ async def issues(interaction: discord.Interaction, status: app_commands.Choice[s
     rows = [f"• [{issue.title}]({issue.html_url})" for issue in page_issues]
     
     msg = f"Challenges ({status.name}) - Page {page}/{total_pages}:\n" + "\n".join(rows)
-    msg += f"\n\n[View all issues]({repo.html_url}/issues)"
+    msg += f"\n\n[View all issues]({gh_repo.html_url}/issues)"
     await interaction.edit_original_response(content=msg)
 
 # ------------------------------
