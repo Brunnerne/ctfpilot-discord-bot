@@ -380,7 +380,10 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
         except requests.exceptions.RequestException as e:
             error_message = str(e)
             if e.response:
-                error_message = e.response.json().get('message', error_message)
+                try:
+                    error_message = e.response.json().get('message', error_message)
+                except Exception:
+                    pass
             logger.error(f"Failed to trigger pipeline: {error_message}")
             await interaction.edit_original_response(content=f"❌ Failed to trigger pipeline. Please check if the pipeline is running, otherwise contact an admin.")
 
