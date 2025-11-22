@@ -428,7 +428,12 @@ class ChallengeUpdateGroup(app_commands.Group):
         if not issue_number:
             await interaction.edit_original_response(content="No issue found for this channel. Please specify an issue number.")
             return
-        issue = gh.get_issue(issue_number)
+        try:
+            issue = gh.get_issue(issue_number)
+        except Exception as e:
+            logger.error(f"Failed to retrieve issue #{issue_number}: {e}")
+            await interaction.edit_original_response(content=f"❌ Could not retrieve issue #{issue_number}")
+            return
         if difficulty:
             new_labels = [l.name for l in issue.labels if not l.name.startswith("Difficulty: ")]
             new_labels.append(f"Difficulty: {difficulty.value}")
