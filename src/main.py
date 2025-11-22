@@ -467,13 +467,17 @@ class ChallengeUpdateGroup(app_commands.Group):
         if not issue_number:
             await interaction.edit_original_response(content="No issue found for this channel. Please specify an issue number.")
             return
-        issue = gh.get_issue(issue_number)
-        ok, err = gh.add_issue_to_project_and_set_status(issue.node_id, PROJECT_ID, status_name=status.value if status else "Idea")
-        if ok:
-            await interaction.edit_original_response(content=f"✅ Updated status to {status.value if status else 'Idea'} for challenge [#{issue.number}]({issue.html_url})")
-        else:
-            logger.error(f"Failed to update status for issue #{issue.number}: {err}")
-            await interaction.edit_original_response(content=f"❌ Failed to update status for challenge [#{issue.number}]({issue.html_url}).")
+        try:
+            issue = gh.get_issue(issue_number)
+            ok, err = gh.add_issue_to_project_and_set_status(issue.node_id, PROJECT_ID, status_name=status.value if status else "Idea")
+            if ok:
+                await interaction.edit_original_response(content=f"✅ Updated status to {status.value if status else 'Idea'} for challenge [#{issue.number}]({issue.html_url})")
+            else:
+                logger.error(f"Failed to update status for issue #{issue.number}: {err}")
+                await interaction.edit_original_response(content=f"❌ Failed to update status for challenge [#{issue.number}]({issue.html_url}).")
+        except Exception as e:
+            logger.error(f"Error retrieving issue #{issue_number}: {e}")
+            await interaction.edit_original_response(content=f"❌ Failed to retrieve issue #{issue_number}. It may not exist or there was an API error.")
 
     @app_commands.command(name="category", description="Update a challenge's category.")
     @app_commands.describe(
