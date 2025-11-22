@@ -289,7 +289,7 @@ This issue is linked to the Discord channel: [#{markdown_clean(safe_name)}](http
                 await interaction.edit_original_response(content=f"✅ Challenge issue created, but failed to add to project: {err} [{issue.title}]({issue.html_url})")
         except requests.exceptions.RequestException as e:
             error_message = str(e)
-            if e.response:
+            if hasattr(e, 'response') and e.response:
                 try:
                     error_message = e.response.json().get('message', error_message)
                 except Exception as parse_exc:
@@ -388,7 +388,7 @@ This issue is linked to the Discord channel: [#{markdown_clean(safe_name)}](http
             await interaction.edit_original_response(content=f"✅ Triggered pipeline for challenge code creation for issue [#{issue_number}]({gh.repo.html_url}/issues/{issue_number})\n\n Check the progress here: [Actions]({actions_url})")
         except requests.exceptions.RequestException as e:
             error_message = str(e)
-            if e.response:
+            if hasattr(e, 'response') and e.response:
                 try:
                     error_message = e.response.json().get('message', error_message)
                 except Exception as parse_exc:

@@ -284,7 +284,7 @@ class GithubHandler:
             return None
         for label in issue.labels:
             if label.name.startswith("Category: "):
-                return label.name.split("Category: ")[1]
+                return label.name.removeprefix("Category: ")
         return None
 
     def create_repo_labels(self, repository: Repository.Repository, categories: list[str], difficulties: list[str]):
