@@ -654,7 +654,7 @@ def clean_input(text: str, field: str = "", min_len: int = 0, max_len: int = 100
     return text
 
 # Precomputed translation tables for escaping
-MARKDOWN_ESCAPE_CHARS = r"\`*_{}[]()#+-.!|>"
+MARKDOWN_ESCAPE_CHARS = r"\`*_{}[]()#@+-.!|>"
 MARKDOWN_ESCAPE_TRANSLATION = {ord(c): "\\" + c for c in MARKDOWN_ESCAPE_CHARS}
 
 DISCORD_ESCAPE_CHARS = r"\[]#@&<>"
