@@ -160,12 +160,12 @@ class GithubHandler:
             variables = {"user": org, "number": project_number}
         r = requests.post(self.api_url, json={"query": query, "variables": variables}, headers=self.headers)
         if not r.ok:
-            self.logger.error(f"Failed to fetch project node id: {r.status_code} {r.text}")
+            self.logger.error(f"Failed to fetch project: {r.status_code} {r.text}")
             return None
         try:
             data = r.json()
         except Exception as e:
-            self.logger.error(f"Could not decode project node id response: {e}, content: {r.text}")
+            self.logger.error(f"Could not decode project response: {e}, content: {r.text}")
             return None
         if is_org:
             project = data.get('data', {}).get('organization', {}).get('projectV2')
@@ -173,7 +173,7 @@ class GithubHandler:
             project = data.get('data', {}).get('user', {}).get('projectV2')
         if project and project.get('id'):
             return project['id']
-        self.logger.error(f"Project node id not found in response: {data}")
+        self.logger.error(f"Project not found in response: {data}")
         return None
 
     def get_issue_project_status(self, issue_number, project_id, issue_node_id):
