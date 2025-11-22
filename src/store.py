@@ -8,6 +8,7 @@ class Store:
     MAPPING_FILENAME = "challenge_issues.json"
     MAPPING_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), MAPPING_FILENAME)
     _lock = threading.Lock()
+    _logger: Logger | None = None
     
     @staticmethod
     def initialize_db(logger: Logger):
@@ -26,7 +27,10 @@ class Store:
             with open(Store.MAPPING_PATH, "r") as f:
                 return json.load(f)
         except Exception as e:
-            Store._logger.error(f"Failed to read DB file, returning empty DB: {e}")
+            if Store._logger:
+                Store._logger.error(f"Failed to read DB file, returning empty DB: {e}")
+            else:
+                print(f"Failed to read DB file, returning empty DB: {e}")
             return {}
 
     @staticmethod
@@ -36,7 +40,10 @@ class Store:
             with open(Store.MAPPING_PATH, "w") as f:
                 json.dump(db, f, indent=2)
         except Exception as e:
-            Store._logger.error(f"Failed to write DB file: {e}")
+            if Store._logger:
+                Store._logger.error(f"Failed to write DB file: {e}")
+            else:
+                print(f"Failed to write DB file: {e}")
 
     @staticmethod
     def get_db():
