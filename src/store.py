@@ -6,7 +6,7 @@ from logger import Logger
 
 class Store:
     MAPPING_FILENAME = "challenge_issues.json"
-    MAPPING_PATH = os.path.join(os.path.dirname(__file__), MAPPING_FILENAME)
+    MAPPING_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), MAPPING_FILENAME)
     _lock = threading.Lock()
     
     @staticmethod
