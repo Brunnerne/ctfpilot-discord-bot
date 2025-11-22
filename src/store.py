@@ -67,3 +67,21 @@ class Store:
             db = Store._get_db_unlocked()
             db[key] = update_func(db.get(key, {}))
             Store._save_db_unlocked(db)
+            
+    @staticmethod
+    def delete_key(key):
+        with Store._lock:
+            db = Store._get_db_unlocked()
+            if key in db:
+                del db[key]
+                Store._save_db_unlocked(db)
+
+    @staticmethod
+    def delete_challenge_key(channel_id):
+        with Store._lock:
+            db = Store._get_db_unlocked()
+            challenges = db.get("challenges", {})
+            if channel_id in challenges:
+                del challenges[channel_id]
+                db["challenges"] = challenges
+                Store._save_db_unlocked(db)

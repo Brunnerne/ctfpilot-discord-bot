@@ -539,8 +539,7 @@ async def clear_channel(interaction: discord.Interaction):
     mapping = Store.get_key("challenges", {}) or {}
     channel_id = str(interaction.channel_id)
     if channel_id in mapping:
-        del mapping[channel_id]
-        Store.set_key("challenges", mapping)
+        Store.delete_challenge_key(channel_id)
         await interaction.response.send_message("✅ Cleared issue-channel mapping for this channel.", ephemeral=True)
     else:
         await interaction.response.send_message("No issue linked to this channel.", ephemeral=True)
