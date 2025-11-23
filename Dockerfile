@@ -10,4 +10,4 @@ RUN apk add --no-cache gcc musl-dev libffi-dev \
 
 COPY src/ /app/
 
-CMD ["python", "main.py"]
+CMD ["python", "main.py", "--debug"]
