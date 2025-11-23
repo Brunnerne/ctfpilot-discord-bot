@@ -162,8 +162,6 @@ graph TD
 - Treat `DISCORD_TOKEN` / `GITHUB_TOKEN` as secrets; use Docker/K8s secret mounts.
 - Limit GitHub token scopes (repo + project + workflow if needed; no admin).
 - Rotate tokens periodically and audit usage.
-- Consider container hardening (AppArmor / seccomp / read-only FS).
-- Validate milestone and project IDs before production usage.
 
 > [!CAUTION]
 > Privileged users can create repository issues, trigger workflows and mutate project status.
