@@ -11,7 +11,7 @@ CTF Pilot's Discord Bot is a Discord bot, designed to integrate into a challenge
 
 ## Overview
 
-The Discord Bot accelerates CTF challenge development, by turning Discord into a challenge management and bootstrapping tool. Each challenge lives as an issue enriched with labels (Category, Difficulty, base `Challenge`), optional milestone, and optional Projects status field. Channels can be mapped to issues for contextual operations (e.g. updating status or difficulty without re‑typing numbers).
+The Discord Bot accelerates CTF challenge development, by turning Discord into a challenge management and bootstrapping tool. Each challenge lives as an issue enriched with labels (Category, Difficulty, base `Challenge`), optional milestone, and optional Projects status field. Channels can be mapped to issues for contextual operations (e.g. updating status or difficulty without re-typing numbers).
 
 ## Key Features
 
@@ -30,7 +30,7 @@ The Discord Bot accelerates CTF challenge development, by turning Discord into a
 In order to run the bot, you need to have:
 
 - A Discord bot token with appropriate permissions (applications.commands, bot with message read/send).
-- A GitHub Fine‑grained Personal Access Token (PAT) with `content`, `issues`, `pull requests`, `projects` and `actions` with read and write.
+- A GitHub Fine-grained Personal Access Token (PAT) with `content`, `issues`, `pull requests`, `projects` and `actions` with read and write.
 - A target GitHub repository (e.g. `ctfpilot/ctfd-challenges`).
 - Target repository has the scaffolding GitHub Actions workflow located in the `create-chall.yml` GitHub Action, if using workflow dispatch.
 - (Optional) A milestone name to apply to new issues.
@@ -172,7 +172,7 @@ graph TD
 | Symptom                 | Likely Cause                        | Resolution                                              |
 | ----------------------- | ----------------------------------- | ------------------------------------------------------- |
 | Commands not visible    | Global sync delay                   | Provide `DISCORD_GUILD_ID` for scoped sync              |
-| Labels not created      | Insufficient PAT scopes             | Ensure `repo` scope / correct fine‑grained permissions  |
+| Labels not created      | Insufficient PAT scopes             | Ensure `repo` scope / correct fine-grained permissions  |
 | Project status missing  | Wrong `GITHUB_PROJECT_ID`           | Confirm numeric project number; check debug logs        |
 | Mapping not saved       | Volume not mounted or file perms    | Verify bind mount, container user permissions           |
 | Workflow dispatch fails | Invalid workflow path / token perms | Check workflow name/path & `workflow` scope             |
