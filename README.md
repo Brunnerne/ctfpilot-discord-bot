@@ -66,6 +66,17 @@ volumes:
 
 *`challenge_issues.json` must be created before starting the container, otherwise the bot will fail to start.*
 
+#### Docker image
+
+A [Docker image](https://github.com/ctfpilot/discord-bot/pkgs/container/discord-bot) is automatically built and published to GitHub Container Registry for each release.  
+You can pull the latest image with:
+
+```sh
+docker pull ghcr.io/ctfpilot/discord-bot:latest
+```
+
+*For the versions available, please see the [releases page](https://github.com/ctfpilot/discord-bot/releases).*
+
 ### Local (Python)
 
 In order to run the bot locally for development or testing, create a Python virtual environment, install dependencies, and run the bot with the required parameters:
