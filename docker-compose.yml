@@ -1,5 +1,5 @@
 services:
-  github-discord-manager:
+  discord-bot:
     build: .
     container_name: github-manager-bot
     restart: unless-stopped

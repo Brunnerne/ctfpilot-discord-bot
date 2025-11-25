@@ -73,13 +73,14 @@ In order to run the bot locally for development or testing, create a Python virt
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r src/requirements.txt
 python src/main.py \
   --token "$DISCORD_TOKEN" --guild "$DISCORD_GUILD_ID" \
   --gh-token "$GITHUB_TOKEN" --gh-repo "$GITHUB_REPO" \
   --categories "web,crypto,pwn,misc" \
   --difficulties "easy,medium,hard" \
   --project-id 7 --status "Idea,Todo,In Progress,In Review,Done" \
+  --allowed-roles "123456789012345678" \
   --milestone "CTF 2025" --verbose
 ```
 
