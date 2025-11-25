@@ -32,7 +32,7 @@ In order to run the bot, you need to have:
 - A Discord bot token with appropriate permissions (applications.commands, bot with message read/send).
 - A GitHub Fine-grained Personal Access Token (PAT) with `content`, `issues`, `pull requests`, `projects` and `actions` with read and write.
 - A target GitHub repository (e.g. `ctfpilot/ctfd-challenges`).
-- Target repository has the challenge scaffolding GitHub Actions workflow located located at `.github/workflows/create-chall.yml`, if using workflow dispatch.
+- Target repository has the challenge scaffolding GitHub Actions workflow located at `.github/workflows/create-chall.yml`, if using workflow dispatch.
 - (Optional) A milestone name to apply to new issues.
 - (Optional) A GitHub Projects v2 numeric project ID (not node ID).
 
