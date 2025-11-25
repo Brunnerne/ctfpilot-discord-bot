@@ -3,7 +3,7 @@
 > [!CAUTION]
 >
 > This Discord bot is still in pre-release alpha stage, and is actively being worked on to make it stable.  
-> This means, that the bot may act in unexpected ways, and not be secure.
+> This means that the bot may act in unexpected ways, and not be secure.
 >
 > **USE AT YOUR OWN RISK.**
 
@@ -42,7 +42,7 @@ To run the bot using Docker Compose, first copy the example environment file and
 Then build and start the container:
 
 ```bash
-cp .env.example .env   # Fill in required values
+cp .env.example .env   # Edit and fill in required values
 touch challenge_issues.json  # Persistent mapping file
 
 # Start the bot
@@ -50,7 +50,7 @@ docker compose build
 docker compose up -d
 ```
 
-A production Docker compose file is available at `docker-compose.prod.yml`, which uses the latest released image.
+A production Docker Compose file is available at `docker-compose.prod.yml`, which uses the latest released image.
 Deploy it using:
 
 ```bash
