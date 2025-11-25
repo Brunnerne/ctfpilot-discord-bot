@@ -19,20 +19,20 @@ The Discord Bot accelerates CTF challenge development, by turning Discord into a
 - Challenge creation with category, difficulty, status, and milestone.
 - Automatic label provisioning to the target challenge repository.
 - GitHub Projects integration (status field assignment via GraphQL).
-- Repository issue workflow dispatch support (trigger actions/workflows), letting Github actions handle further automation.
+- Repository issue workflow dispatch support (trigger actions/workflows), letting Github Actions handle further automation.
 - Channel-to-issue linkage and metadata retrieval.
-- Role based access control for sensitive commands.
+- Role-based access control for sensitive commands.
 
 ## How to run
 
-### Prerquisites
+### Prerequisites
 
 In order to run the bot, you need to have:
 
 - A Discord bot token with appropriate permissions (applications.commands, bot with message read/send).
 - A GitHub Fine-grained Personal Access Token (PAT) with `content`, `issues`, `pull requests`, `projects` and `actions` with read and write.
 - A target GitHub repository (e.g. `ctfpilot/ctfd-challenges`).
-- Target repository has the scaffolding GitHub Actions workflow located in the `create-chall.yml` GitHub Action, if using workflow dispatch.
+- Target repository has the challenge scaffolding GitHub Actions workflow located located at `.github/workflows/create-chall.yml`, if using workflow dispatch.
 - (Optional) A milestone name to apply to new issues.
 - (Optional) A GitHub Projects v2 numeric project ID (not node ID).
 
@@ -79,7 +79,7 @@ python src/main.py \
   --gh-token "$GITHUB_TOKEN" --gh-repo "$GITHUB_REPO" \
   --categories "web,crypto,pwn,misc" \
   --difficulties "easy,medium,hard" \
-  --project-id 7 --status "Idea,Todo,In Progress,In review,Done" \
+  --project-id 7 --status "Idea,Todo,In Progress,In Review,Done" \
   --milestone "CTF 2025" --verbose
 ```
 
@@ -89,19 +89,19 @@ python src/main.py \
 
 Environment may be set via `.env`, Docker, or CLI flags. Required core variables must be present before startup or the bot exits early.
 
-| Variable                | Required | Description                                      | Example                                |
-| ----------------------- | -------- | ------------------------------------------------ | -------------------------------------- |
-| `DISCORD_TOKEN`         | Yes      | Discord bot token                                | `NAI...`                               |
-| `DISCORD_GUILD_ID`      | Yes      | Guild ID for scoped sync & authorization         | `123456789012345678`                   |
-| `DISCORD_ALLOWED_ROLES` | Yes      | Comma role IDs allowed for privileged commands   | `111,222`                              |
-| `GITHUB_TOKEN`          | Yes      | GitHub PAT (repo + project + workflow if needed) | `ghp_xxxx`                             |
-| `GITHUB_REPO`           | Yes      | Target repository (`owner/name`)                 | `ctfpilot/ctfd-challenges`             |
-| `GITHUB_PROJECT_ID`     | No       | Numeric Projects v2 number (not node ID)         | `7`                                    |
-| `CATEGORIES`            | No       | Comma list of categories                         | `web,crypto,pwn,misc`                  |
-| `DIFFICULTIES`          | No       | Comma list of difficulties                       | `easy,medium,hard`                     |
-| `STATUS`                | No       | Comma list of project status values              | `Idea,Todo,In Progress,In review,Done` |
-| `MILESTONE`             | No       | Milestone applied to new issues                  | `CTF 2025`                             |
-| `FLAG_PREFIX`           | No       | Prefix for flags before `{}` braces              | `ctf`                                  |
+| Variable                | Required | Description                                                                  | Example                                |
+| ----------------------- | -------- | ---------------------------------------------------------------------------- | -------------------------------------- |
+| `DISCORD_TOKEN`         | Yes      | Discord bot token                                                            | `NAI...`                               |
+| `DISCORD_GUILD_ID`      | Yes      | Guild ID for scoped sync & authorization                                     | `123456789012345678`                   |
+| `DISCORD_ALLOWED_ROLES` | Yes      | Comma role IDs allowed for privileged commands. Required to authorize users. | `111,222`                              |
+| `GITHUB_TOKEN`          | Yes      | GitHub PAT (repo + project + workflow if needed)                             | `ghp_xxxx`                             |
+| `GITHUB_REPO`           | Yes      | Target repository (`owner/name`)                                             | `ctfpilot/ctfd-challenges`             |
+| `GITHUB_PROJECT_ID`     | No       | Numeric Projects v2 number (not node ID)                                     | `7`                                    |
+| `CATEGORIES`            | No       | Comma list of categories                                                     | `web,crypto,pwn,misc`                  |
+| `DIFFICULTIES`          | No       | Comma list of difficulties                                                   | `easy,medium,hard`                     |
+| `STATUS`                | No       | Comma list of project status values                                          | `Idea,Todo,In Progress,In Review,Done` |
+| `MILESTONE`             | No       | Milestone applied to new issues                                              | `CTF 2025`                             |
+| `FLAG_PREFIX`           | No       | Prefix for flags before `{}` braces                                          | `ctf`                                  |
 
 ## Command Reference
 
