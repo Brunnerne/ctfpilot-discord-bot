@@ -1,7 +1,7 @@
 services:
   discord-bot:
     build: .
-    container_name: github-manager-bot
+    container_name: ctfpilot-discord-bot
     restart: unless-stopped
     env_file: .env
     volumes:
