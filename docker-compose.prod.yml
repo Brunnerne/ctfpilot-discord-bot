@@ -1,9 +1,8 @@
 services:
   discord-bot:
-    build: .
+    image: ghcr.io/ctfpilot/discord-bot:latest
     container_name: ctfpilot-discord-bot
     restart: unless-stopped
     env_file: .env
     volumes:
       - ./challenge_issues.json:/app/challenge_issues.json
-      

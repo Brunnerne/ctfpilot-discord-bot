@@ -19,3 +19,19 @@ jobs:
     with:
       repository: ctfpilot/discord-bot
       ENVIRONMENT: Release
+
+  docker:
+    name: Docker build and push
+    needs:
+      - release
+    uses: ctfpilot/ci/.github/workflows/docker.yml@v1.3.0
+    if: needs.release.outputs.version != '' && needs.release.outputs.version != null
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    with:
+      repository: ctfpilot/discord-bot
+      semver: ${{ needs.release.outputs.version }}
+      arguments: |
+        VERSION=${{ needs.release.outputs.version }}
