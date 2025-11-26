@@ -303,14 +303,14 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
         author="Author of the challenge",
         category="Category of the challenge (optional if used in mapped channel)",
         difficulty="Difficulty of the challenge (optional if used in mapped channel)",
-        challenge_type="Type of challenge (static, online, instanced)",
+        challenge_type="Type of challenge (static, shared, instanced)",
         instanced_type="Type of instanced (none, tcp, web)",
         flag="Flag (format: " + FLAG_PREFIX + "{...}, dynamic, or null)"
     )
     @app_commands.choices(
         category=[app_commands.Choice(name=cat, value=cat) for cat in CATEGORIES],
         difficulty=[app_commands.Choice(name=diff, value=diff) for diff in DIFFICULTIES],
-        challenge_type=[app_commands.Choice(name=t, value=t) for t in ["static", "online", "instanced"]],
+        challenge_type=[app_commands.Choice(name=t, value=t) for t in ["static", "shared", "instanced"]],
         instanced_type=[app_commands.Choice(name=t, value=t) for t in ["none", "tcp", "web"]]
     )
     async def code(self, interaction: discord.Interaction, author: str, challenge_type: app_commands.Choice[str], instanced_type: app_commands.Choice[str], flag: str, name: Optional[str], category: Optional[app_commands.Choice[str]], difficulty: Optional[app_commands.Choice[str]], issue_number: Optional[int] = None):
