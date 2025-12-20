@@ -207,7 +207,7 @@ To administrate the CLA signing process, we are using **[CLA assistant lite](htt
 
 ## License
 
-This schema and repository is licensed under the **EUPL-1.2 License**.  
+This component and repository is licensed under the **EUPL-1.2 License**.  
 You can find the full license in the **[LICENSE](LICENSE)** file.
 
 We encourage all modifications and contributions to be shared back with the community, for example through pull requests to this repository.  
