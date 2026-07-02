@@ -9,6 +9,7 @@ from logger import Logger
 from store import Store
 from typing import Optional
 
+from utils import clean_input, discord_clean, is_authorized as user_is_authorized, markdown_clean
 from github_handler import GithubHandler
 from exceptions.GithubInitializationException import GithubInitializationException
 from exceptions.WorkflowTriggerException import WorkflowTriggerException
@@ -85,6 +86,10 @@ else:
 ###################
 
 client = create_client(GUILD_ID, logger)
+
+
+def is_authorized(interaction: discord.Interaction) -> bool:
+    return user_is_authorized(interaction, GUILD_ID, ALLOWED_ROLES)
 
 ###################
 # Discord commands
@@ -559,51 +564,5 @@ async def info(interaction: discord.Interaction, issue_number: Optional[int] = N
     except Exception as e:
         logger.error(f"Failed to fetch issue info: {e}")
         await interaction.edit_original_response(content="❌ Failed to fetch challenge info. Please contact an admin.")
-
-def is_authorized(interaction: discord.Interaction) -> bool:
-    """Check if the user has at least one allowed role (by ID) and is in an allowed guild."""
-    # Check if interaction.guild is None
-    if interaction.guild is None:
-        return False
-    # Check allowed guild
-    guild_id = str(interaction.guild.id)
-    if GUILD_ID is not None and guild_id != GUILD_ID:
-        return False
-    # Check allowed roles (by role ID)
-    if not ALLOWED_ROLES:
-        return False
-    if not hasattr(interaction.user, 'roles'):
-        return False
-    return any(str(role.id) in ALLOWED_ROLES for role in getattr(interaction.user, 'roles', []))
-
-def clean_input(text: str, field: str = "", min_len: int = 0, max_len: int = 100) -> str:
-    """Sanitize user input for GitHub/Discord. Returns sanitized string or raises ValueError."""
-    if not isinstance(text, str):
-        raise ValueError(f"{field or 'Input'} must be a string.")
-    text = text.strip()
-    if len(text) < min_len:
-        raise ValueError(f"{field or 'Input'} is too short (min {min_len} chars).")
-    if len(text) > max_len:
-        raise ValueError(f"{field or 'Input'} is too long (max {max_len} chars).")
-    # Remove newlines and excessive whitespace
-    text = ' '.join(text.split())
-    
-    return text
-
-# Precomputed translation tables for escaping
-MARKDOWN_ESCAPE_CHARS = r"`*_{}[]()#+-.!|>"
-MARKDOWN_ESCAPE_TRANSLATION = {ord(c): "\\" + c for c in MARKDOWN_ESCAPE_CHARS}
-DISCORD_ESCAPE_CHARS = r"[]#@&<>"
-DISCORD_ESCAPE_TRANSLATION = {ord(c): "\\" + c for c in DISCORD_ESCAPE_CHARS}
-
-def markdown_clean(text: str, field: str = "", min_len: int = 0, max_len: int = 100) -> str:
-    """Clean and escape markdown special characters in a string."""
-    clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
-    return clean_text.translate(MARKDOWN_ESCAPE_TRANSLATION)
-
-def discord_clean(text: str, field: str = "", min_len: int = 0, max_len: int = 100) -> str:
-    """Clean and escape Discord special characters in a string."""
-    clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
-    return clean_text.translate(DISCORD_ESCAPE_TRANSLATION)
 
 client.run(config.discord_token)
