@@ -2,13 +2,14 @@ from dataclasses import dataclass
 
 from config import BotConfig
 from exceptions.GithubInitializationException import GithubInitializationException
+from github import Repository
 from github_handler import GithubHandler
 from logger import Logger
 
 @dataclass(frozen=True)
 class AppServices:
     gh: GithubHandler
-    gh_repo: object
+    gh_repo: Repository.Repository
     github_repo_name: str
     github_enabled: bool
     project_id: str | None
