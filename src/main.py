@@ -1,20 +1,15 @@
-import os
-import argparse
 import requests
-
-from dotenv import load_dotenv
 
 import discord
 from discord import app_commands
 
-from github import Github
-from github import Auth
-
+from config import load_config
 from logger import Logger
 from store import Store
 from typing import Optional
 
 from github_handler import GithubHandler
+from exceptions.GithubInitializationException import GithubInitializationException
 from exceptions.WorkflowTriggerException import WorkflowTriggerException
 
 logger: Logger
@@ -23,100 +18,59 @@ logger: Logger
 # Startup configuration
 ###################
 
-# Parse env/args for project config at module level
-load_dotenv()
-
-parser = argparse.ArgumentParser(description='Discord Bot Manager')
-parser.add_argument('--token', type=str, help='Discord Bot Token')
-parser.add_argument('--guild', type=str, help='Discord Guild ID for command sync')
-parser.add_argument('--gh-token', type=str, help='GitHub Token for API access')
-parser.add_argument('--gh-repo', type=str, help='GitHub Repository for API access')
-parser.add_argument('--verbose', action='store_true', help='Enable verbose logging')
-parser.add_argument('--debug', action='store_true', help='Enable debug logging')
-parser.add_argument('--categories', type=str, help='Comma-separated list of challenge categories')
-parser.add_argument('--difficulties', type=str, help='Comma-separated list of challenge difficulties')
-parser.add_argument('--project-id', type=str, help='GitHub Project ID (Projects v2)')
-parser.add_argument('--status', type=str, help='Comma-separated list of challenge status options')
-parser.add_argument('--milestone', type=str, help='Milestone name for created issues')
-parser.add_argument('--allowed-roles', type=str, help='Comma-separated list of Discord roles allowed to use restricted commands')
-parser.add_argument('--flag-prefix', type=str, help='Prefix for challenge flags before the flag brackets (e.g., ctf for ctf{...})')
-args, _ = parser.parse_known_args()
-
-logger = Logger(verbose=args.verbose, debug=args.debug)
+config = load_config()
+logger = Logger(verbose=config.verbose, debug=config.debug)
 Store.initialize_db(logger)
-    
-if args.token:
-    os.environ['DISCORD_TOKEN'] = args.token
-if args.guild:
-    os.environ['DISCORD_GUILD_ID'] = args.guild
-if args.gh_token:
-    os.environ['GITHUB_TOKEN'] = args.gh_token
-if args.gh_repo:
-    os.environ['GITHUB_REPO'] = args.gh_repo
-if args.categories:
-    os.environ['CATEGORIES'] = args.categories
-if args.difficulties:
-    os.environ['DIFFICULTIES'] = args.difficulties
-if args.project_id:
-    os.environ['GITHUB_PROJECT_ID'] = args.project_id
-if args.status:
-    os.environ['STATUS'] = args.status
-if args.milestone:
-    os.environ['MILESTONE'] = args.milestone
-if args.allowed_roles:
-    os.environ['DISCORD_ALLOWED_ROLES'] = args.allowed_roles
-if args.flag_prefix:
-    os.environ['FLAG_PREFIX'] = args.flag_prefix
 
-if not os.getenv('DISCORD_TOKEN'):
+if not config.discord_token:
     logger.error("Please set the DISCORD_TOKEN environment variable.")
     exit(1)
-    
-if not os.getenv('DISCORD_GUILD_ID'):
+
+if not config.discord_guild_id:
     logger.info("No DISCORD_GUILD_ID provided, commands will be synced globally.")
-    
-if not os.getenv('GITHUB_TOKEN'):
+
+if not config.github_token:
     logger.warning("No GITHUB_TOKEN provided, GitHub API features will be disabled.")
-if not os.getenv('GITHUB_REPO'):
+if not config.github_repo:
     logger.warning("No GITHUB_REPO provided, GitHub API features will be disabled.")
 
-GUILD_ID = os.getenv('DISCORD_GUILD_ID')
+GUILD_ID = config.discord_guild_id
 if not GUILD_ID:
     logger.warning("No DISCORD_GUILD_ID provided, no commands will be available.")
 
-CATEGORIES = [c.strip() for c in (os.getenv('CATEGORIES') or 'web,crypto,pwn,misc').split(',')]
-DIFFICULTIES = [d.strip() for d in (os.getenv('DIFFICULTIES') or 'easy,medium,hard').split(',')]
-STATUS = [s.strip() for s in (os.getenv('STATUS') or 'Idea,Todo,In Progress,In review,Done').split(',')]
-ALLOWED_ROLES = [r.strip() for r in (os.getenv('DISCORD_ALLOWED_ROLES') or '').split(',') if r.strip()]
+CATEGORIES = config.categories
+DIFFICULTIES = config.difficulties
+STATUS = config.statuses
+ALLOWED_ROLES = config.allowed_role_ids
 if len(ALLOWED_ROLES) == 0:
     logger.info("No DISCORD_ALLOWED_ROLES provided, no commands will be available.")
-
-FLAG_PREFIX = os.getenv('FLAG_PREFIX') or "ctf"
-FLAG_LENGTH = 1000
+FLAG_PREFIX = config.flag_prefix
+FLAG_LENGTH = config.flag_length
 
 # --- GH configuration ---
-GH_REPO = os.getenv('GITHUB_REPO')
-gh_enabled = bool(os.getenv('GITHUB_TOKEN') and GH_REPO)
+GH_REPO = config.github_repo
+gh_enabled = config.github_enabled
 PROJECT_ORG = GH_REPO.split('/')[0] if GH_REPO else None
-PROJECT_NUMBER = os.getenv('GITHUB_PROJECT_ID')  # This is the project number, not node ID
+PROJECT_NUMBER = config.github_project_id
 PROJECT_ID = None
-MILESTONE_NAME = os.getenv('MILESTONE') or ""
+MILESTONE_NAME = config.milestone_name
 
 if not gh_enabled:
     logger.error("GitHub not enabled due to missing configuration.")
     logger.error("Bot will not start")
     exit(1)
 
-github: Github
-github_token = os.getenv('GITHUB_TOKEN') or ""
-gh = GithubHandler(github_token, GH_REPO or "", logger)
+github_token = config.github_token
 gh_repo = None
 
-auth = Auth.Token(github_token)
-github = Github(auth=auth)
-gh_repo = github.get_repo(GH_REPO or "")
-
-gh.create_repo_labels(gh_repo, CATEGORIES, DIFFICULTIES)
+try:
+    gh = GithubHandler(github_token, GH_REPO or "", logger)
+    gh_repo = gh.repo
+    gh.create_repo_labels(gh_repo, CATEGORIES, DIFFICULTIES)
+except GithubInitializationException as e:
+    logger.error(str(e))
+    logger.error("Bot will not start")
+    exit(1)
 
 if PROJECT_ORG and PROJECT_NUMBER:
     PROJECT_ID = gh.get_project_node_id(PROJECT_ORG, int(PROJECT_NUMBER), is_org=True)
@@ -669,4 +623,4 @@ def discord_clean(text: str, field: str = "", min_len: int = 0, max_len: int = 1
     clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
     return clean_text.translate(DISCORD_ESCAPE_TRANSLATION)
 
-client.run(os.getenv('DISCORD_TOKEN') or "")
+client.run(config.discord_token)
