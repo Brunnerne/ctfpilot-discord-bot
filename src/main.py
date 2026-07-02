@@ -3,6 +3,7 @@ import requests
 import discord
 from discord import app_commands
 
+from bot import create_client
 from config import load_config
 from logger import Logger
 from store import Store
@@ -83,25 +84,7 @@ else:
 # Bot configuration
 ###################
 
-intents = discord.Intents.default()
-
-class MyClient(discord.Client):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.tree = app_commands.CommandTree(self)
-
-    async def setup_hook(self):
-        # Sync commands to a specific guild for faster updates (optional)
-        if GUILD_ID:
-            guild = discord.Object(id=int(GUILD_ID))
-            self.tree.copy_global_to(guild=guild)
-            await self.tree.sync(guild=guild)
-            logger.info(f"Slash commands synced to guild {GUILD_ID}")
-        else:
-            await self.tree.sync()
-            logger.info("Slash commands synced globally (may take up to 1 hour to appear)")
-
-client = MyClient(intents=intents)
+client = create_client(GUILD_ID, logger)
 
 ###################
 # Discord commands
