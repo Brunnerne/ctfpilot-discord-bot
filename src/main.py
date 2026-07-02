@@ -6,11 +6,11 @@ from discord import app_commands
 from bot import create_client
 from config import load_config
 from logger import Logger
+from services import initialize_services
 from store import Store
 from typing import Optional
 
 from utils import clean_input, discord_clean, is_authorized as user_is_authorized, markdown_clean
-from github_handler import GithubHandler
 from exceptions.GithubInitializationException import GithubInitializationException
 from exceptions.WorkflowTriggerException import WorkflowTriggerException
 
@@ -50,36 +50,19 @@ FLAG_PREFIX = config.flag_prefix
 FLAG_LENGTH = config.flag_length
 
 # --- GH configuration ---
-GH_REPO = config.github_repo
-gh_enabled = config.github_enabled
-PROJECT_ORG = GH_REPO.split('/')[0] if GH_REPO else None
-PROJECT_NUMBER = config.github_project_id
-PROJECT_ID = None
-MILESTONE_NAME = config.milestone_name
-
-if not gh_enabled:
-    logger.error("GitHub not enabled due to missing configuration.")
-    logger.error("Bot will not start")
-    exit(1)
-
-github_token = config.github_token
-gh_repo = None
-
 try:
-    gh = GithubHandler(github_token, GH_REPO or "", logger)
-    gh_repo = gh.repo
-    gh.create_repo_labels(gh_repo, CATEGORIES, DIFFICULTIES)
+    services = initialize_services(config, logger)
 except GithubInitializationException as e:
     logger.error(str(e))
     logger.error("Bot will not start")
     exit(1)
 
-if PROJECT_ORG and PROJECT_NUMBER:
-    PROJECT_ID = gh.get_project_node_id(PROJECT_ORG, int(PROJECT_NUMBER), is_org=True)
-    if not PROJECT_ID:
-        logger.error(f"Could not resolve project node ID for org={PROJECT_ORG}, number={PROJECT_NUMBER}")
-else:
-    PROJECT_ID = None
+gh = services.gh
+gh_repo = services.gh_repo
+GH_REPO = services.github_repo_name
+gh_enabled = services.github_enabled
+PROJECT_ID = services.project_id
+MILESTONE_NAME = services.milestone_name
 
 ###################
 # Bot configuration
