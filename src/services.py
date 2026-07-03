@@ -31,9 +31,16 @@ def initialize_services(config: BotConfig, logger: Logger) -> AppServices:
     gh.create_repo_labels(gh_repo, config.categories, config.difficulties)
 
     if project_org and project_number:
-        project_id = gh.get_project_node_id(project_org, int(project_number), is_org=True)
-        if not project_id:
-            logger.error(f"Could not resolve project node ID for org={project_org}, number={project_number}")
+        try:
+            project_number_int = int(project_number)
+        except ValueError:
+            logger.warning(f"Invalid GITHUB_PROJECT_ID '{project_number}', project commands will be disabled.")
+            project_number_int = None
+
+        if project_number_int is not None:
+            project_id = gh.get_project_node_id(project_org, project_number_int, is_org=True)
+            if not project_id:
+                logger.error(f"Could not resolve project node ID for org={project_org}, number={project_number}")
 
     return AppServices(
         gh=gh,

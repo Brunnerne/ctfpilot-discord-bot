@@ -188,10 +188,13 @@ class GithubHandler:
         except Exception as e:
             self.logger.error(f"Could not decode project response: {e}, content: {r.text}")
             return None
+        data_node = data.get('data') or {}
         if is_org:
-            project = data.get('data', {}).get('organization', {}).get('projectV2')
+            owner_node = data_node.get('organization') or {}
+            project = owner_node.get('projectV2')
         else:
-            project = data.get('data', {}).get('user', {}).get('projectV2')
+            owner_node = data_node.get('user') or {}
+            project = owner_node.get('projectV2')
         if project and project.get('id'):
             return project['id']
         self.logger.error(f"Project not found in response: {data}")
