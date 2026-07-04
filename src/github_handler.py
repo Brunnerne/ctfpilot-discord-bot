@@ -55,6 +55,11 @@ class GithubHandler:
     def set_issue_labels(self, issue, labels):
         issue.set_labels(*labels)
 
+    def replace_prefixed_label(self, issue, prefix, value):
+        new_labels = [l.name for l in issue.labels if not l.name.startswith(prefix)]
+        new_labels.append(f"{prefix}{value}")
+        self.set_issue_labels(issue, new_labels)
+
     def get_workflow(self, workflow_path):
         return self.repo.get_workflow(workflow_path)
 
@@ -70,7 +75,7 @@ class GithubHandler:
             raise WorkflowTriggerException(f"Failed to trigger workflow: {e}")
 
     def get_status_field_and_option_id(self, project_id, status_name="Idea"):
-        # Fetch the status field ID and the option ID for the given status name
+        """Fetch the status field ID and the option ID for the given status name."""
         query = '''
         query($projectId:ID!) {
           node(id: $projectId) {

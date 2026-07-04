@@ -5,6 +5,7 @@ from github import Repository
 
 from github_handler import GithubHandler
 from logger import Logger
+from store import Store
 
 # Precomputed translation tables for escaping
 MARKDOWN_ESCAPE_CHARS = r"`*_{}[]()#+-.!|>"
@@ -60,6 +61,24 @@ def discord_clean(text: str, field: str = "", min_len: int = 0, max_len: int = 1
 # Command Context
 ##################
 
+async def _respond(interaction: discord.Interaction, content: str) -> None:
+    """Reply to an interaction, editing the deferred response if one exists or sending ephemerally."""
+    if interaction.response.is_done():
+        await interaction.edit_original_response(content=content)
+    else:
+        await interaction.response.send_message(content, ephemeral=True)
+
+
+async def resolve_issue_or_reply(interaction: discord.Interaction, issue_number: int | None) -> int | None:
+    """Resolve the issue number from the argument or the channel mapping, replying if none is found."""
+    if issue_number is None:
+        issue_number = Store.get_challenge_key(str(interaction.channel_id))
+    if not issue_number:
+        await interaction.edit_original_response(content="No issue found for this channel. Please specify an issue number.")
+        return None
+    return issue_number
+
+
 @dataclass(frozen=True)
 class CommandContext:
     logger: Logger
@@ -83,3 +102,15 @@ class CommandContext:
     def unauthorized_message(self) -> str:
         roles = ", ".join(self.allowed_roles) if self.allowed_roles else "None set"
         return f"❌ You must have one of the following roles to use this command: {roles}."
+
+    async def deny_if_unauthorized(self, interaction: discord.Interaction) -> bool:
+        if self.is_authorized(interaction):
+            return False
+        await _respond(interaction, self.unauthorized_message())
+        return True
+
+    async def deny_if_github_disabled(self, interaction: discord.Interaction) -> bool:
+        if self.github_enabled:
+            return False
+        await _respond(interaction, "GitHub API features are disabled.")
+        return True
