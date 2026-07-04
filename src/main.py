@@ -1,7 +1,7 @@
 from bot import create_client
 from commands.challenge import register_challenge_commands
 from commands.challenges import register_challenges_command
-from commands.context import CommandContext
+from utils import CommandContext
 from config import load_config
 from exceptions.GithubInitializationException import GithubInitializationException
 from logger import Logger
@@ -22,17 +22,14 @@ if not config.discord_token:
     logger.error("Please set the DISCORD_TOKEN environment variable.")
     exit(1)
 
-if not config.discord_guild_id:
+guild_id = config.discord_guild_id
+if not guild_id:
     logger.info("No DISCORD_GUILD_ID provided, commands will be synced globally.")
 
 if not config.github_token:
     logger.warning("No GITHUB_TOKEN provided, GitHub API features will be disabled.")
 if not config.github_repo:
     logger.warning("No GITHUB_REPO provided, GitHub API features will be disabled.")
-
-guild_id = config.discord_guild_id
-if not guild_id:
-    logger.warning("No DISCORD_GUILD_ID provided, no commands will be available.")
 
 if len(config.allowed_role_ids) == 0:
     logger.info("No DISCORD_ALLOWED_ROLES provided, no commands will be available.")
