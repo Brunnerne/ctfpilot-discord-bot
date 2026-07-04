@@ -6,7 +6,7 @@ from discord import app_commands
 from logger import Logger
 
 
-class MyClient(discord.Client):
+class BotClient(discord.Client):
     def __init__(self, guild_id: Optional[str], logger: Logger, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.guild_id = guild_id
@@ -25,6 +25,6 @@ class MyClient(discord.Client):
             self.logger.info("Slash commands synced globally (may take up to 1 hour to appear)")
 
 
-def create_client(guild_id: Optional[str], logger: Logger) -> MyClient:
+def create_client(guild_id: Optional[str], logger: Logger) -> BotClient:
     intents = discord.Intents.default()
-    return MyClient(guild_id=guild_id, logger=logger, intents=intents)
+    return BotClient(guild_id=guild_id, logger=logger, intents=intents)
