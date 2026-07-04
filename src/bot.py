@@ -1,19 +1,23 @@
 from typing import Optional
 
 import discord
-from discord import app_commands
+from discord.ext import commands
 
 from logger import Logger
+from utils import CommandContext
 
 
-class BotClient(discord.Client):
-    def __init__(self, guild_id: Optional[str], logger: Logger, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+class BotClient(commands.Bot):
+    def __init__(self, guild_id: Optional[str], logger: Logger, command_context: CommandContext, *args, **kwargs):
+        super().__init__(command_prefix="/", *args, **kwargs)
         self.guild_id = guild_id
         self.logger = logger
-        self.tree = app_commands.CommandTree(self)
+        self.command_context = command_context
 
     async def setup_hook(self):
+        from cogs.loader import load_cogs
+        await load_cogs(self, self.command_context)
+        
         # Sync commands to a specific guild for faster updates (optional)
         if self.guild_id:
             guild = discord.Object(id=int(self.guild_id))
@@ -24,7 +28,7 @@ class BotClient(discord.Client):
             await self.tree.sync()
             self.logger.info("Slash commands synced globally (may take up to 1 hour to appear)")
 
+BotInteraction = discord.Interaction[BotClient]
 
-def create_client(guild_id: Optional[str], logger: Logger) -> BotClient:
-    intents = discord.Intents.default()
-    return BotClient(guild_id=guild_id, logger=logger, intents=intents)
+def create_client(guild_id: Optional[str], logger: Logger, command_context: CommandContext) -> BotClient:
+    return BotClient(guild_id=guild_id, logger=logger, command_context=command_context, intents=discord.Intents.default())

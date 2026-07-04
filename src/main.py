@@ -1,6 +1,4 @@
 from bot import create_client
-from commands.challenge import register_challenge_commands
-from commands.challenges import register_challenges_command
 from utils import CommandContext
 from config import load_config
 from exceptions.GithubInitializationException import GithubInitializationException
@@ -62,7 +60,7 @@ command_context = CommandContext(
 # Bot configuration
 ###################
 
-client = create_client(guild_id, logger)
+client = create_client(guild_id, logger, command_context)
 
 ###################
 # Discord commands
@@ -70,14 +68,7 @@ client = create_client(guild_id, logger)
 
 @client.event
 async def on_ready():
-    logger.info(f'We have logged in as {client.user}')
+    logger.info(f'Logged in as {client.user}')
 
-register_challenges_command(client.tree, command_context)
-
-# ------------------------------
-# Challenge management commands
-# ------------------------------
-
-register_challenge_commands(client.tree, command_context)
 
 client.run(config.discord_token)

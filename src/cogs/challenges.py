@@ -1,13 +1,19 @@
+"""Cog for /challenges command to list GitHub challenges."""
+
 from typing import Optional
 
 import discord
 from discord import app_commands
+from discord.ext import commands
 
-from utils import CommandContext
 
+class ChallengesCog(commands.Cog):
+    """Cog for listing challenges from GitHub."""
 
-def register_challenges_command(tree: app_commands.CommandTree, ctx: CommandContext) -> None:
-    @tree.command(name="challenges", description="List challenges in the GitHub.")
+    def __init__(self, bot):
+        self.bot = bot
+
+    @app_commands.command(name="challenges", description="List challenges in the GitHub.")
     @app_commands.describe(
         status="Show all, open (non-finished), or closed (finished) challenges.",
         page="Page number to display (default: 1)")
@@ -17,13 +23,14 @@ def register_challenges_command(tree: app_commands.CommandTree, ctx: CommandCont
             app_commands.Choice(name="Open (non-finished)", value="open"),
             app_commands.Choice(name="Closed (finished)", value="closed"),
         ])
-    async def issues(interaction: discord.Interaction, status: app_commands.Choice[str], page: Optional[int] = 1):
+    async def challenges(self, interaction: discord.Interaction, status: app_commands.Choice[str], page: Optional[int] = 1):
+        """List challenges from GitHub, optionally filtered by status with pagination."""
         await interaction.response.defer(thinking=True)
-        if not ctx.is_authorized(interaction):
-            await interaction.edit_original_response(content=ctx.unauthorized_message())
+        ctx = self.bot.command_context
+        
+        if await ctx.deny_if_unauthorized(interaction):
             return
-        if not ctx.github_enabled:
-            await interaction.edit_original_response(content="GitHub API features are disabled.")
+        if await ctx.deny_if_github_disabled(interaction):
             return
         
         if not ctx.gh_repo:
@@ -70,3 +77,8 @@ def register_challenges_command(tree: app_commands.CommandTree, ctx: CommandCont
         msg = f"Challenges ({status.name}) - Page {page}/{total_pages}:\n" + "\n".join(rows)
         msg += f"\n\n[View all issues]({ctx.gh_repo.html_url}/issues)"
         await interaction.edit_original_response(content=msg)
+
+
+async def setup(bot):
+    """Load this cog into the bot."""
+    await bot.add_cog(ChallengesCog(bot))
