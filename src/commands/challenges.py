@@ -3,7 +3,7 @@ from typing import Optional
 import discord
 from discord import app_commands
 
-from commands.context import CommandContext
+from utils import CommandContext
 
 
 def register_challenges_command(tree: app_commands.CommandTree, ctx: CommandContext) -> None:

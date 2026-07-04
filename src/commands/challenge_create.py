@@ -5,10 +5,9 @@ import requests
 import discord
 from discord import app_commands
 
-from commands.context import CommandContext
 from exceptions.WorkflowTriggerException import WorkflowTriggerException
 from store import Store
-from utils import clean_input, markdown_clean
+from utils import clean_input, markdown_clean, CommandContext
 
 
 def build_challenge_create_group(ctx: CommandContext) -> app_commands.Group:

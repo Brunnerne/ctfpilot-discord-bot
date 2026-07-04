@@ -3,9 +3,8 @@ from typing import Optional
 import discord
 from discord import app_commands
 
-from commands.context import CommandContext
 from store import Store
-from utils import discord_clean
+from utils import discord_clean, CommandContext
 
 
 def register_challenge_misc_commands(challenge_group: app_commands.Group, ctx: CommandContext) -> None:

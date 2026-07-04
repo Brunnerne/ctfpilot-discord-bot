@@ -3,7 +3,7 @@ from discord import app_commands
 from commands.challenge_create import build_challenge_create_group
 from commands.challenge_misc import register_challenge_misc_commands
 from commands.challenge_update import build_challenge_update_group
-from commands.context import CommandContext
+from utils import CommandContext
 
 
 def register_challenge_commands(tree: app_commands.CommandTree, ctx: CommandContext) -> None:

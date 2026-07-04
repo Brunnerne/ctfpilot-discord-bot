@@ -3,9 +3,8 @@ from typing import Optional
 import discord
 from discord import app_commands
 
-from commands.context import CommandContext
 from store import Store
-from utils import markdown_clean
+from utils import markdown_clean, CommandContext
 
 
 def build_challenge_update_group(ctx: CommandContext) -> app_commands.Group:

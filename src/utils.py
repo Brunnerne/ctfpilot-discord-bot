@@ -1,4 +1,10 @@
 import discord
+from dataclasses import dataclass
+
+from github import Repository
+
+from github_handler import GithubHandler
+from logger import Logger
 
 # Precomputed translation tables for escaping
 MARKDOWN_ESCAPE_CHARS = r"`*_{}[]()#+-.!|>"
@@ -48,3 +54,32 @@ def discord_clean(text: str, field: str = "", min_len: int = 0, max_len: int = 1
     """Clean and escape Discord special characters in a string."""
     clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
     return clean_text.translate(DISCORD_ESCAPE_TRANSLATION)
+
+
+##################
+# Command Context
+##################
+
+@dataclass(frozen=True)
+class CommandContext:
+    logger: Logger
+    gh: GithubHandler
+    gh_repo: Repository.Repository
+    github_repo_name: str
+    github_enabled: bool
+    project_id: str | None
+    milestone_name: str
+    guild_id: str | None
+    allowed_roles: list[str]
+    categories: list[str]
+    difficulties: list[str]
+    statuses: list[str]
+    flag_prefix: str
+    flag_length: int
+
+    def is_authorized(self, interaction: discord.Interaction) -> bool:
+        return is_authorized(interaction, self.guild_id, self.allowed_roles)
+
+    def unauthorized_message(self) -> str:
+        roles = ", ".join(self.allowed_roles) if self.allowed_roles else "None set"
+        return f"❌ You must have one of the following roles to use this command: {roles}."
