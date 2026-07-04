@@ -1,5 +1,6 @@
 import discord
 from dataclasses import dataclass
+from discord import app_commands
 
 from github import Repository
 
@@ -114,3 +115,19 @@ class CommandContext:
             return False
         await _respond(interaction, "GitHub API features are disabled.")
         return True
+
+
+def apply_config_choices(cog) -> None:
+    """Populate config-driven choices on a cog's commands."""
+    ctx = cog.bot.command_context
+    fields = {
+        "category": ctx.categories,
+        "difficulty": ctx.difficulties,
+        "status": ctx.statuses,
+    }
+    for cmd in cog.walk_app_commands():
+        if not isinstance(cmd, app_commands.Command):
+            continue
+        for name, values in fields.items():
+            if name in cmd._params:
+                cmd._params[name].choices = [app_commands.Choice(name=v, value=v) for v in values]

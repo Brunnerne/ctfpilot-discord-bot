@@ -1,6 +1,7 @@
 """Challenge management cog for the /challenge command group."""
 
-from .choices import apply_config_choices
+from utils import apply_config_choices
+
 from .cog import ChallengeCog
 
 
