@@ -51,9 +51,10 @@ def load_config() -> BotConfig:
         milestone_name=_resolve_value(args.milestone, "MILESTONE", default=""),
         allowed_role_ids=_resolve_list(args.allowed_roles, "DISCORD_ALLOWED_ROLES", filter_empty=True),
         flag_prefix=_resolve_value(args.flag_prefix, "FLAG_PREFIX", default=DEFAULT_FLAG_PREFIX),
-        flag_length=DEFAULT_FLAG_LENGTH,
-        verbose=args.verbose,
-        debug=args.debug)
+        flag_length=int(_resolve_value(args.flag_length, "FLAG_LENGTH", default=str(DEFAULT_FLAG_LENGTH))),
+        verbose=_resolve_value(args.verbose, "VERBOSE", default="False").lower() == "true",
+        debug=_resolve_value(args.debug, "DEBUG", default="False").lower() == "true"
+        )
 
 
 def _parse_args() -> argparse.Namespace:
@@ -71,6 +72,7 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--milestone", type=str, help="Milestone name for created issues")
     parser.add_argument("--allowed-roles", type=str, help="Comma-separated list of Discord roles allowed to use restricted commands")
     parser.add_argument("--flag-prefix", type=str, help="Prefix for challenge flags before the flag brackets (e.g., ctf for ctf{...})")
+    parser.add_argument("--flag-length", type=int, help="Length of the generated challenge flags")
     args, _ = parser.parse_known_args()
     return args
 
