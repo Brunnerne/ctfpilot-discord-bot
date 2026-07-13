@@ -162,3 +162,6 @@ This issue is linked to the Discord channel: [#{safe_name}](https://discord.com/
         except WorkflowTriggerException as e:
             ctx.logger.error(f"Failed to trigger pipeline: {e}")
             await interaction.edit_original_response(content=f"❌ Failed to trigger pipeline. Please check if the pipeline is running, otherwise contact an admin.")
+        except Exception as e:
+            ctx.logger.error(f"Unexpected error while triggering pipeline: {e}")
+            await interaction.edit_original_response(content=f"❌ An unexpected error occurred while triggering the pipeline. Please contact an admin.")
