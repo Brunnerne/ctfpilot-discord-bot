@@ -9,7 +9,7 @@ on:
 jobs:
   release:
     name: Release
-    uses: ctfpilot/ci/.github/workflows/release.yml@v1.3.0
+    uses: ctfpilot/ci/.github/workflows/release.yml@v1.5.1
     permissions:
       contents: write
       packages: write
@@ -24,7 +24,7 @@ jobs:
     name: Docker build and push
     needs:
       - release
-    uses: ctfpilot/ci/.github/workflows/docker.yml@v1.3.0
+    uses: ctfpilot/ci/.github/workflows/docker.yml@v1.5.1
     if: needs.release.outputs.version != '' && needs.release.outputs.version != null
     permissions:
       contents: read
