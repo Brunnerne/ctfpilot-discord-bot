@@ -2,6 +2,7 @@
 
 import importlib
 import sys
+import traceback
 from pathlib import Path
 
 from bot import BotClient
@@ -43,5 +44,5 @@ async def load_cogs(bot: BotClient, command_context: CommandContext) -> None:
                 bot.command_context.logger.info(f"Loaded cog: {cog_name}")
             else:
                 bot.command_context.logger.warning(f"Cog {cog_name} does not have a setup() function, skipping")
-        except Exception as e:
-            bot.command_context.logger.error(f"Failed to load cog {cog_name}: {e}")
+        except Exception:
+            bot.command_context.logger.error(f"Failed to load cog {cog_name}:\n{traceback.format_exc()}")
