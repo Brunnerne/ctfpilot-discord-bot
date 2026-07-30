@@ -151,10 +151,15 @@ Example structure:
 
 | Component               | Responsibility                                                     |
 | ----------------------- | ------------------------------------------------------------------ |
-| `main.py`               | Startup, env parsing, slash tree building, lifecycle.              |
+| `main.py`               | Startup, service initialization and lifecycle.                    |
+| `config.py`             | Environment and CLI configuration loading.                         |
+| `bot.py`                | Discord client creation, cog loading and slash command syncing.   |
+| `cogs/`                 | Slash command cogs and dynamic cog loader. |
+| `services.py`           | Runtime GitHub service setup and project resolution.               |
 | `github_handler.py`     | Issues, labels, milestone, workflow dispatch, Projects v2 GraphQL. |
 | `store.py`              | Thread-safe JSON persistence for channel → issue mappings.         |
 | `logger.py`             | Structured logging with verbosity & debug control.                 |
+| `utils.py`              | Command context, authorization helpers and input sanitization. |
 | `challenge_issues.json` | Persistent datastore for mappings.                                 |
 
 Diagram:

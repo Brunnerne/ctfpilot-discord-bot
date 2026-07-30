@@ -1,6 +1,8 @@
 import requests
 from logger import Logger
 from github import Github, Issue, Repository
+from github.GithubException import BadCredentialsException, GithubException, UnknownObjectException
+from exceptions.GithubInitializationException import GithubInitializationException
 from exceptions.WorkflowTriggerException import WorkflowTriggerException
 
 class GithubHandler:
@@ -9,8 +11,27 @@ class GithubHandler:
         self.api_url = "https://api.github.com/graphql"
         self.headers = {"Authorization": f"Bearer {self.github_token}"}
         self.gh = Github(github_token)
-        self.repo = self.gh.get_repo(repo_name)
         self.logger = logger
+        self.repo = self._get_repo(repo_name)
+
+    def _get_repo(self, repo_name: str):
+        repo_parts = repo_name.split("/") if repo_name else []
+        if len(repo_parts) != 2 or not all(repo_parts):
+            raise GithubInitializationException("GITHUB_REPO must be in the format 'owner/name'.")
+
+        try:
+            return self.gh.get_repo(repo_name)
+        except BadCredentialsException as exc:
+            raise GithubInitializationException("GitHub authentication failed. Check GITHUB_TOKEN or GITHUB_REPO.") from exc
+        except UnknownObjectException as exc:
+            raise GithubInitializationException(
+                f"Could not find GitHub repository '{repo_name}' or the token does not have access to it."
+            ) from exc
+        except GithubException as exc:
+            message = exc.data.get("message", str(exc)) if isinstance(exc.data, dict) else str(exc)
+            raise GithubInitializationException(
+                f"Failed to initialize GitHub repository '{repo_name}': {message}"
+            ) from exc
 
     def get_milestone(self, title: str):
         try:
@@ -34,6 +55,11 @@ class GithubHandler:
     def set_issue_labels(self, issue, labels):
         issue.set_labels(*labels)
 
+    def replace_prefixed_label(self, issue, prefix, value):
+        new_labels = [l.name for l in issue.labels if not l.name.startswith(prefix)]
+        new_labels.append(f"{prefix}{value}")
+        self.set_issue_labels(issue, new_labels)
+
     def get_workflow(self, workflow_path):
         return self.repo.get_workflow(workflow_path)
 
@@ -49,7 +75,7 @@ class GithubHandler:
             raise WorkflowTriggerException(f"Failed to trigger workflow: {e}")
 
     def get_status_field_and_option_id(self, project_id, status_name="Idea"):
-        # Fetch the status field ID and the option ID for the given status name
+        """Fetch the status field ID and the option ID for the given status name."""
         query = '''
         query($projectId:ID!) {
           node(id: $projectId) {
@@ -167,10 +193,13 @@ class GithubHandler:
         except Exception as e:
             self.logger.error(f"Could not decode project response: {e}, content: {r.text}")
             return None
+        data_node = data.get('data') or {}
         if is_org:
-            project = data.get('data', {}).get('organization', {}).get('projectV2')
+            owner_node = data_node.get('organization') or {}
+            project = owner_node.get('projectV2')
         else:
-            project = data.get('data', {}).get('user', {}).get('projectV2')
+            owner_node = data_node.get('user') or {}
+            project = owner_node.get('projectV2')
         if project and project.get('id'):
             return project['id']
         self.logger.error(f"Project not found in response: {data}")
@@ -288,20 +317,24 @@ class GithubHandler:
 
     def create_repo_labels(self, repository: Repository.Repository, categories: list[str], difficulties: list[str]):
         """Create category and difficulty labels in the repository if they do not exist."""
-        existing_labels = {label.name: label for label in repository.get_labels()}
-        
-        # Ensure "Challenge" exists as a label
-        if "Challenge" not in existing_labels:
-            repository.create_label(name="Challenge", color="5319E7", description="Indicates a challenge issue")
-            self.logger.info("Created label: Challenge")
-        
-        for category in categories:
-            label_name = f"Category: {category}"
-            if label_name not in existing_labels:
-                repository.create_label(name=label_name, color="0E8A16", description=f"Challenge category: {category}")
-                self.logger.info(f"Created label: {label_name}")
-        for difficulty in difficulties:
-            label_name = f"Difficulty: {difficulty}"
-            if label_name not in existing_labels:
-                repository.create_label(name=label_name, color="D93F0B", description=f"Challenge difficulty: {difficulty}")
-                self.logger.info(f"Created label: {label_name}")
+        try:
+            existing_labels = {label.name: label for label in repository.get_labels()}
+            
+            # Ensure "Challenge" exists as a label
+            if "Challenge" not in existing_labels:
+                repository.create_label(name="Challenge", color="5319E7", description="Indicates a challenge issue")
+                self.logger.info("Created label: Challenge")
+            
+            for category in categories:
+                label_name = f"Category: {category}"
+                if label_name not in existing_labels:
+                    repository.create_label(name=label_name, color="0E8A16", description=f"Challenge category: {category}")
+                    self.logger.info(f"Created label: {label_name}")
+            for difficulty in difficulties:
+                label_name = f"Difficulty: {difficulty}"
+                if label_name not in existing_labels:
+                    repository.create_label(name=label_name, color="D93F0B", description=f"Challenge difficulty: {difficulty}")
+                    self.logger.info(f"Created label: {label_name}")
+        except GithubException as exc:
+            message = exc.data.get("message", str(exc)) if isinstance(exc.data, dict) else str(exc)
+            raise GithubInitializationException(f"Failed to create or verify GitHub labels: {message}") from exc
