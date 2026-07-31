@@ -88,6 +88,8 @@ class CommandContext:
     github_repo_name: str
     github_enabled: bool
     project_id: str | None
+    project_org: str | None
+    project_number: str | None
     milestone_name: str
     guild_id: str | None
     allowed_roles: list[str]
@@ -96,6 +98,8 @@ class CommandContext:
     statuses: list[str]
     flag_prefix: str
     flag_length: int
+    review_status: str
+    review_limit: int
 
     def is_authorized(self, interaction: discord.Interaction) -> bool:
         return is_authorized(interaction, self.guild_id, self.allowed_roles)

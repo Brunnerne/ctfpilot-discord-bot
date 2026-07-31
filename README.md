@@ -114,12 +114,14 @@ Environment may be set via `.env`, Docker, or CLI flags. Required core variables
 | `STATUS`                | No       | Comma-separated list of project status values                                          | `Idea,Todo,In Progress,In Review,Done` |
 | `MILESTONE`             | No       | Milestone applied to new issues                                                        | `CTF 2025`                             |
 | `FLAG_PREFIX`           | No       | Prefix for flags before `{}` braces                                                    | `ctf`                                  |
+| `REVIEW_STATUS`         | No       | Project status value considered "awaiting review"                                      | `In Review`                            |
+| `REVIEW_LIMIT`          | No       | Maximum number of challenges shown by `/challenge reviews`                             | `10`                                   |
 
 ## Command Reference
 
 All commands are slash commands. Authorization requires the invoking member to have at least one role ID in `DISCORD_ALLOWED_ROLES` and be in the configured guild.
 
-- `/challenges [status] [page]`: Paginated list (10 per page) filtered by issue state.
+- `/challenges [status] [page]`: Paginated list (10 per page) filtered by issue state (all/open/closed) or project board status.
 - `/challenge`
   - `create`: Create challenge
     - `issue [name] [category] [difficulty] [status]`: Create challenge issue, and link it to the current channel
@@ -130,6 +132,7 @@ All commands are slash commands. Authorization requires the invoking member to h
     - `difficulty [difficulty] [issue_number]`: Update challenge difficulty. Issue number may be skipped if run in a channel with a linked challenge issue.
     - `category [category] [issue_number]`: Update challenge category. Issue number may be skipped if run in a channel with a linked challenge issue.
   - `info [issue_number]`: Show challenge metadata. Issue number may be skipped if run in a channel with a linked challenge issue.
+  - `reviews [author]`: List challenges with status `REVIEW_STATUS` (default `In Review`), optionally filtered by GitHub assignee username. Shows up to `REVIEW_LIMIT` challenges with links to GitHub and, if linked, the Discord channel.
   - `link_channel [issue_number]`: Link current channel to issue
   - `clear_channel`: Clear current channel mapping
 

@@ -13,6 +13,8 @@ class AppServices:
     github_repo_name: str
     github_enabled: bool
     project_id: str | None
+    project_org: str | None
+    project_number: str | None
     milestone_name: str
 
 def initialize_services(config: BotConfig, logger: Logger) -> AppServices:
@@ -48,4 +50,6 @@ def initialize_services(config: BotConfig, logger: Logger) -> AppServices:
         github_repo_name=github_repo_name,
         github_enabled=github_enabled,
         project_id=project_id,
+        project_org=project_org,
+        project_number=project_number,
         milestone_name=config.milestone_name)

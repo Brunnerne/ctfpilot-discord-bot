@@ -205,6 +205,99 @@ class GithubHandler:
         self.logger.error(f"Project not found in response: {data}")
         return None
 
+    def get_issues_by_status(self, project_id, status_name, assignee=None):
+        """Return project items whose Status field matches status_name, optionally filtered by assignee login.
+        Each result is a dict with number, title, url, labels and assignees."""
+        query = '''
+        query($projectId:ID!, $cursor:String) {
+          node(id: $projectId) {
+            ... on ProjectV2 {
+              items(first: 100, after: $cursor) {
+                pageInfo {
+                  hasNextPage
+                  endCursor
+                }
+                nodes {
+                  content {
+                    ... on Issue {
+                      number
+                      title
+                      url
+                      labels(first: 20) { nodes { name } }
+                      assignees(first: 10) { nodes { login } }
+                    }
+                  }
+                  fieldValues(first: 100) {
+                    nodes {
+                      ... on ProjectV2ItemFieldSingleSelectValue {
+                        field {
+                          ... on ProjectV2SingleSelectField {
+                            name
+                          }
+                        }
+                        name
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        '''
+
+        results = []
+        cursor = None
+        while True:
+            variables = {"projectId": project_id, "cursor": cursor}
+            r = requests.post(self.api_url, json={"query": query, "variables": variables}, headers=self.headers)
+            if not r.ok:
+                self.logger.error(f"Failed to fetch project items: {r.status_code} {r.text}")
+                break
+            try:
+                data = r.json()
+            except Exception as e:
+                self.logger.error(f"Could not decode project items response: {e}, content: {r.text}")
+                break
+
+            node = data.get('data', {}).get('node') or {}
+            items_data = node.get('items', {}) or {}
+            items = items_data.get('nodes', []) or []
+
+            for item in items:
+                content = item.get('content') if item else None
+                if not content:
+                    continue
+
+                field_values = item.get('fieldValues', {}).get('nodes', []) if item.get('fieldValues') else []
+                status = None
+                for field_value in field_values:
+                    field = field_value.get('field', {}) if field_value else {}
+                    if field.get('name') == 'Status':
+                        status = field_value.get('name')
+                        break
+                if status != status_name:
+                    continue
+
+                assignee_logins = [a.get('login') for a in content.get('assignees', {}).get('nodes', [])]
+                if assignee and assignee not in assignee_logins:
+                    continue
+
+                results.append({
+                    "number": content.get('number'),
+                    "title": content.get('title'),
+                    "url": content.get('url'),
+                    "labels": [label.get('name') for label in content.get('labels', {}).get('nodes', [])],
+                    "assignees": assignee_logins,
+                })
+
+            page_info = items_data.get('pageInfo', {})
+            if not page_info.get('hasNextPage'):
+                break
+            cursor = page_info.get('endCursor')
+
+        return results
+
     def get_issue_project_status(self, issue_number, project_id, issue_node_id):
         """Return the project status for the given issue in the given project, or 'Unknown' if not found."""
         query = '''

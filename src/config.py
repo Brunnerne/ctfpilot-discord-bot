@@ -10,6 +10,8 @@ DEFAULT_DIFFICULTIES = "easy,medium,hard"
 DEFAULT_STATUSES = "Idea,Todo,In Progress,In review,Done"
 DEFAULT_FLAG_PREFIX = "ctf"
 DEFAULT_FLAG_LENGTH = 1000
+DEFAULT_REVIEW_STATUS = "In Review"
+DEFAULT_REVIEW_LIMIT = 10
 
 
 @dataclass(frozen=True)
@@ -28,6 +30,8 @@ class BotConfig:
     flag_length: int
     verbose: bool
     debug: bool
+    review_status: str
+    review_limit: int
 
     @property
     def github_enabled(self) -> bool:
@@ -53,7 +57,9 @@ def load_config() -> BotConfig:
         flag_prefix=_resolve_value(args.flag_prefix, "FLAG_PREFIX", default=DEFAULT_FLAG_PREFIX),
         flag_length=int(_resolve_value(args.flag_length, "FLAG_LENGTH", default=str(DEFAULT_FLAG_LENGTH))),
         verbose=_resolve_value(args.verbose, "VERBOSE", default="False").lower() == "true",
-        debug=_resolve_value(args.debug, "DEBUG", default="False").lower() == "true"
+        debug=_resolve_value(args.debug, "DEBUG", default="False").lower() == "true",
+        review_status=_resolve_value(args.review_status, "REVIEW_STATUS", default=DEFAULT_REVIEW_STATUS),
+        review_limit=_resolve_review_limit(args.review_limit)
         )
 
 
@@ -73,6 +79,8 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--allowed-roles", type=str, help="Comma-separated list of Discord roles allowed to use restricted commands")
     parser.add_argument("--flag-prefix", type=str, help="Prefix for challenge flags before the flag brackets (e.g., ctf for ctf{...})")
     parser.add_argument("--flag-length", type=int, help="Length of the generated challenge flags")
+    parser.add_argument("--review-status", type=str, help='Project status value considered "awaiting review"')
+    parser.add_argument("--review-limit", type=str, help="Maximum number of challenges shown by the /challenge reviews command")
     args, _ = parser.parse_known_args()
     return args
 
@@ -95,3 +103,11 @@ def _resolve_list(cli_value: str | None, env_name: str, default: str = "", filte
     if filter_empty:
         return [item for item in items if item]
     return items
+
+
+def _resolve_review_limit(cli_value: str | None) -> int:
+    raw_value = _resolve_value(cli_value, "REVIEW_LIMIT", default=str(DEFAULT_REVIEW_LIMIT))
+    try:
+        return int(raw_value)
+    except ValueError:
+        return DEFAULT_REVIEW_LIMIT

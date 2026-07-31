@@ -47,6 +47,8 @@ command_context = CommandContext(
     github_repo_name=services.github_repo_name,
     github_enabled=services.github_enabled,
     project_id=services.project_id,
+    project_org=services.project_org,
+    project_number=services.project_number,
     milestone_name=services.milestone_name,
     guild_id=guild_id,
     allowed_roles=config.allowed_role_ids,
@@ -54,7 +56,9 @@ command_context = CommandContext(
     difficulties=config.difficulties,
     statuses=config.statuses,
     flag_prefix=config.flag_prefix,
-    flag_length=config.flag_length)
+    flag_length=config.flag_length,
+    review_status=config.review_status,
+    review_limit=config.review_limit)
 
 ###################
 # Bot configuration
