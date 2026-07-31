@@ -1,3 +1,5 @@
+import re
+
 import discord
 from dataclasses import dataclass
 from discord import app_commands
@@ -7,12 +9,6 @@ from github import Repository
 from github_handler import GithubHandler
 from logger import Logger
 from store import Store
-
-# Precomputed translation tables for escaping
-MARKDOWN_ESCAPE_CHARS = r"`*_{}[]()#+-.!|>"
-MARKDOWN_ESCAPE_TRANSLATION = {ord(c): "\\" + c for c in MARKDOWN_ESCAPE_CHARS}
-DISCORD_ESCAPE_CHARS = r"[]#@&<>"
-DISCORD_ESCAPE_TRANSLATION = {ord(c): "\\" + c for c in DISCORD_ESCAPE_CHARS}
 
 def is_authorized(interaction: discord.Interaction, guild_id: str | None, allowed_roles: list[str]) -> bool:
     """Check if the user has at least one allowed role (by ID) and is in an allowed guild."""
@@ -50,12 +46,18 @@ def clean_input(text: str, field: str = "", min_len: int = 0, max_len: int = 100
 def markdown_clean(text: str, field: str = "", min_len: int = 0, max_len: int = 100) -> str:
     """Clean and escape markdown special characters in a string."""
     clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
-    return clean_text.translate(MARKDOWN_ESCAPE_TRANSLATION)
+    return discord.utils.escape_markdown(clean_text, ignore_links=False)
+
+def escape_channel_mentions(text: str) -> str:
+    """Break Discord channel reference syntax (<#channel_id>) so it doesn't render as a channel link."""
+    return re.sub(r'<#([0-9]{17,20})>', r'<#​\1>', text)
 
 def discord_clean(text: str, field: str = "", min_len: int = 0, max_len: int = 100) -> str:
-    """Clean and escape Discord special characters in a string."""
+    """Clean and escape Discord special characters and mentions in a string."""
     clean_text = clean_input(text, field=field, min_len=min_len, max_len=max_len)
-    return clean_text.translate(DISCORD_ESCAPE_TRANSLATION)
+    clean_text = discord.utils.escape_markdown(clean_text, ignore_links=False)
+    clean_text = discord.utils.escape_mentions(clean_text)
+    return escape_channel_mentions(clean_text)
 
 
 ##################

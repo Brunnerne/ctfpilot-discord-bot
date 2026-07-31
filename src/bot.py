@@ -31,4 +31,9 @@ class BotClient(commands.Bot):
 BotInteraction = discord.Interaction[BotClient]
 
 def create_client(guild_id: Optional[str], logger: Logger, command_context: CommandContext) -> BotClient:
-    return BotClient(guild_id=guild_id, logger=logger, command_context=command_context, intents=discord.Intents.default())
+    return BotClient(
+        guild_id=guild_id,
+        logger=logger,
+        command_context=command_context,
+        intents=discord.Intents.default(),
+        allowed_mentions=discord.AllowedMentions.none())
